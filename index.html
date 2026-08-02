@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cody Carlson — Carving · Painting · Lapidary</title>
+  <meta name="description" content="Cody Carlson is a sculptor, painter, and lapidary artist. Books currently open for custom commissions." />
+
+  <meta property="og:title" content="Cody Carlson — Carving · Painting · Lapidary" />
+  <meta property="og:description" content="Books currently open for custom commissions in carving, painting, and lapidary." />
+  <meta property="og:type" content="website" />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23151312'/%3E%3Ctext x='50' y='66' font-size='55' text-anchor='middle' fill='%23c8a869' font-family='Georgia,serif'%3ECC%3C/text%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <div id="bg-layer" aria-hidden="true"></div>
+  <div id="bg-scrim" aria-hidden="true"></div>
+
+  <a class="skip-link" href="#intake-form">Skip to contact form</a>
+
+  <!-- ============ HERO / INTAKE ============ -->
+  <header class="hero" id="top">
+    <div class="hero-inner">
+      <p class="brand-mark">Cody Carlson</p>
+      <div class="books-open" role="status">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="books-open-label" id="availability-label">Books Open</span>
+      </div>
+      <p class="hero-sub" id="availability-subtext"></p>
+      <h1 class="hero-heading" id="hero-heading"></h1>
+      <p class="hero-discipline" id="hero-subheading"></p>
+
+      <div class="hero-actions">
+        <a class="btn btn-primary" id="call-btn" href="#">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.63 2.63a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.45-1.2a2 2 0 0 1 2.11-.45c.85.3 1.73.51 2.63.63A2 2 0 0 1 22 16.92z"/></svg>
+          Call
+        </a>
+        <a class="btn btn-secondary" id="email-btn" href="#">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+          Email
+        </a>
+      </div>
+
+      <form class="intake-form" id="intake-form" novalidate>
+        <h2 class="form-title">Start a Commission Inquiry</h2>
+        <div class="form-row">
+          <div class="field">
+            <label for="f-name">Name</label>
+            <input type="text" id="f-name" name="name" autocomplete="name" required />
+          </div>
+          <div class="field">
+            <label for="f-email">Email</label>
+            <input type="email" id="f-email" name="email" autocomplete="email" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="f-phone">Phone <span class="optional">(optional)</span></label>
+            <input type="tel" id="f-phone" name="phone" autocomplete="tel" />
+          </div>
+          <div class="field">
+            <label for="f-interest">What are you interested in?</label>
+            <select id="f-interest" name="interest" multiple></select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-message">Tell me about your project</label>
+          <textarea id="f-message" name="message" rows="4" placeholder="Materials, size, timeline, inspiration — whatever you've got."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-submit">Send Inquiry</button>
+        <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+    <div class="scroll-cue" aria-hidden="true">
+      <span></span>
+      <small>Scroll to view work</small>
+    </div>
+  </header>
+
+  <!-- ============ MAIN ROLODEX ============ -->
+  <section class="rolodex-section rolodex-main" aria-labelledby="main-rolodex-heading">
+    <div class="rolodex-header">
+      <h2 id="main-rolodex-heading">Featured Work</h2>
+      <div class="rolodex-controls">
+        <button class="rolodex-arrow" data-rolodex="main" data-dir="-1" aria-label="Scroll featured work left">‹</button>
+        <button class="rolodex-arrow" data-rolodex="main" data-dir="1" aria-label="Scroll featured work right">›</button>
+      </div>
+    </div>
+    <div class="rolodex-track" id="rolodex-main" tabindex="0" aria-label="Featured work carousel"></div>
+  </section>
+
+  <!-- ============ SECONDARY ROLODEX ============ -->
+  <section class="rolodex-section rolodex-secondary" aria-labelledby="secondary-rolodex-heading">
+    <div class="rolodex-header">
+      <h2 id="secondary-rolodex-heading">In the Studio</h2>
+      <div class="rolodex-controls">
+        <button class="rolodex-arrow" data-rolodex="secondary" data-dir="-1" aria-label="Scroll studio photos left">‹</button>
+        <button class="rolodex-arrow" data-rolodex="secondary" data-dir="1" aria-label="Scroll studio photos right">›</button>
+      </div>
+    </div>
+    <div class="rolodex-track" id="rolodex-secondary" tabindex="0" aria-label="In the studio carousel"></div>
+  </section>
+
+  <!-- ============ BIO ============ -->
+  <section class="content-section bio-section" id="bio">
+    <div class="content-card bio-card">
+      <div class="bio-photo" id="bio-photo" aria-hidden="true"></div>
+      <div class="bio-text">
+        <h2 id="bio-heading"></h2>
+        <div id="bio-paragraphs"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRICING ============ -->
+  <section class="content-section pricing-section" id="pricing">
+    <div class="content-card">
+      <h2 class="section-title">Pricing</h2>
+      <p class="section-subtitle">Every commission is quoted individually — these ranges are a starting point for conversation.</p>
+      <div class="pricing-grid" id="pricing-grid"></div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="footer-sponsors">
+      <p class="footer-label">Proudly supported by</p>
+      <div class="sponsor-row" id="sponsor-row"></div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-contact">
+        <a id="footer-email" href="#"></a>
+        <span class="footer-divider">·</span>
+        <a id="footer-phone" href="#"></a>
+      </div>
+      <p class="footer-copy">© <span id="footer-year"></span> Cody Carlson. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Lightbox for viewing rolodex photos larger -->
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lightbox-close" id="lightbox-close" aria-label="Close image viewer">&times;</button>
+    <img id="lightbox-img" alt="" />
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
