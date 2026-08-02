@@ -11,7 +11,7 @@ window.SITE_CONFIG = {
   // drop the file into assets/images/ and point to it here.
   // A quick way to preview a different image without editing this file:
   // add ?bg=https://example.com/photo.jpg to the page URL.
-  backgroundImage: "assets/images/background-placeholder.svg",
+  backgroundImage: "assets/images/IMG_0448.jpeg",
 
   hero: {
     availabilityLabel: "Books Open",
