@@ -21,18 +21,18 @@ window.SITE_CONFIG = {
   },
 
   contact: {
-    email: "hello@codycarlson.art",
-    phone: "+1 (555) 010-2938",
-    phoneDisplay: "(555) 010-2938",
+    email: "cody@codycarlson.art",
+    phone: "+17013895644",
+    phoneDisplay: "(701) 389-5644",
     instagram: "", // e.g. "https://instagram.com/codycarlsonart" — leave blank to hide
   },
 
   // How the intake form is submitted.
   // "mailto"  -> opens the visitor's email client pre-filled with their message (works with zero setup).
-  // "endpoint" -> POSTs the form as JSON to `endpoint` below (e.g. a Formspree/Getform/custom API URL).
+  // "endpoint" -> POSTs the form as JSON to `endpoint` below (e.g. FormSubmit.co, Formspree, a custom API URL).
   form: {
-    submitMode: "mailto", // "mailto" | "endpoint"
-    endpoint: "", // e.g. "https://formspree.io/f/xxxxxxx"
+    submitMode: "endpoint", // "mailto" | "endpoint"
+    endpoint: "https://formsubmit.co/ajax/cody@codycarlson.art",
   },
 
   interests: [
