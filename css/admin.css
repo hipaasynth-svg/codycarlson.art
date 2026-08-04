@@ -1,0 +1,226 @@
+/* Admin dashboard — reuses the site's color variables from styles.css but
+   lays out as a plain, functional back-office page rather than the public
+   marketing page. No background photo here on purpose. */
+
+.admin-body {
+  background: var(--ink);
+  min-height: 100vh;
+}
+
+/* ---------- Password gate ---------- */
+.admin-gate {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+.admin-gate-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  text-align: center;
+}
+.admin-gate-card h1 {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem;
+}
+.admin-gate-card p {
+  color: var(--cream-dim);
+  margin: 0 0 1.25rem;
+  font-size: 0.9rem;
+}
+.admin-gate-card input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 0.7rem 0.85rem;
+  color: var(--cream);
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+.admin-gate-card .btn { width: 100%; justify-content: center; }
+.admin-gate-status {
+  margin: 0.85rem 0 0;
+  font-size: 0.85rem;
+  color: #e07a5f;
+  min-height: 1.2em;
+}
+
+/* ---------- Dashboard shell ---------- */
+.admin-dashboard {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 6rem;
+}
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.admin-header h1 {
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  margin: 0;
+}
+.admin-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.admin-link { color: var(--cream-dim); font-size: 0.9rem; text-decoration: underline; }
+.admin-link:hover { color: var(--gold); }
+
+.admin-help {
+  color: var(--cream-dim);
+  font-size: 0.9rem;
+  max-width: 70ch;
+  margin: 0 0 2.5rem;
+}
+
+/* ---------- Gallery editor ---------- */
+.admin-section {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  margin-bottom: 1.75rem;
+}
+.admin-section h2 {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  margin: 0 0 0.35rem;
+}
+.admin-section-help {
+  color: var(--cream-dim);
+  font-size: 0.85rem;
+  margin: 0 0 1.25rem;
+}
+
+.admin-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.admin-photo-slot {
+  position: relative;
+  aspect-ratio: 4/5;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.admin-photo-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-photo-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--cream-dim);
+  cursor: pointer;
+  border: 1.5px dashed var(--card-border);
+  border-radius: 10px;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  text-align: center;
+  padding: 0.75rem;
+}
+.admin-photo-empty:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: var(--gold-soft);
+}
+.admin-photo-empty.is-uploading { pointer-events: none; opacity: 0.6; }
+.admin-photo-empty .plus { font-family: var(--serif); font-size: 1.75rem; line-height: 1; }
+.admin-photo-empty small { font-size: 0.7rem; letter-spacing: 0.03em; }
+.admin-photo-slot input[type="file"] { display: none; }
+
+.admin-photo-remove {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(13, 12, 11, 0.75);
+  color: var(--cream);
+  font-size: 0.95rem;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* ---------- Collaborator ---------- */
+.admin-collab-grid {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+.admin-collab-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.admin-collab-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--cream-dim);
+}
+.admin-collab-fields input,
+.admin-collab-fields textarea {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  color: var(--cream);
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+/* ---------- Save bar ---------- */
+.admin-save-bar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(13, 12, 11, 0.92);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(10px);
+}
+.admin-save-status {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--gold);
+}
+.admin-save-btn { padding: 0.85rem 2rem; }
+
+@media (max-width: 640px) {
+  .admin-collab-grid { grid-template-columns: 1fr; }
+  .admin-photo-slot:first-child { max-width: 180px; }
+  .admin-save-bar { flex-direction: column; align-items: stretch; text-align: center; }
+}

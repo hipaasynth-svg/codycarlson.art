@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin — Manage Photos — Cody Carlson</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body class="admin-body">
+
+  <!-- ============ PASSWORD GATE ============ -->
+  <div class="admin-gate" id="admin-gate">
+    <form class="admin-gate-card" id="gate-form">
+      <h1>Manage Photos</h1>
+      <p>Enter the admin password to continue.</p>
+      <input type="password" id="gate-password" autocomplete="current-password" placeholder="Password" required />
+      <button type="submit" class="btn btn-primary">Enter</button>
+      <p class="admin-gate-status" id="gate-status" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+
+  <!-- ============ DASHBOARD ============ -->
+  <div class="admin-dashboard" id="admin-dashboard" hidden>
+    <header class="admin-header">
+      <h1>Manage Photos</h1>
+      <div class="admin-header-actions">
+        <a href="/" class="admin-link">View site</a>
+        <button type="button" class="btn btn-secondary" id="logout-btn">Log out</button>
+      </div>
+    </header>
+
+    <p class="admin-help">
+      Add or remove photos below, then hit <strong>Save Changes</strong> at the bottom.
+      Nothing visitors see updates until you save. Empty slots are simply skipped
+      on the live site — you don't need to fill every one.
+    </p>
+
+    <div id="admin-galleries"></div>
+
+    <section class="admin-section" id="admin-collaborator">
+      <h2>Collaborator</h2>
+      <p class="admin-section-help">Shown as its own section near the bottom of the site, above the Silver Rings gallery. Leave everything blank to hide it.</p>
+      <div class="admin-collab-grid">
+        <div class="admin-photo-slot" id="collab-photo-slot">
+          <div class="admin-photo-empty" id="collab-photo-empty">
+            <span class="plus">+</span>
+            <small>Upload Photo</small>
+            <input type="file" accept="image/*" id="collab-photo-input" />
+          </div>
+        </div>
+        <div class="admin-collab-fields">
+          <label>
+            Headline
+            <input type="text" id="collab-headline-input" placeholder="e.g. Silver work by Jane Doe" maxlength="200" />
+          </label>
+          <label>
+            Bio
+            <textarea id="collab-bio-input" rows="4" placeholder="A short bio for this collaborator" maxlength="2000"></textarea>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <div class="admin-save-bar">
+      <p class="admin-save-status" id="save-status" role="status" aria-live="polite"></p>
+      <button type="button" class="btn btn-primary admin-save-btn" id="save-btn">Save Changes</button>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

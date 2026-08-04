@@ -43,7 +43,7 @@
           Call
         </a>
         <a class="btn btn-secondary" id="email-btn" href="#">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
           Email
         </a>
       </div>
@@ -60,15 +60,9 @@
             <input type="email" id="f-email" name="email" autocomplete="email" required />
           </div>
         </div>
-        <div class="form-row">
-          <div class="field">
-            <label for="f-phone">Phone <span class="optional">(optional)</span></label>
-            <input type="tel" id="f-phone" name="phone" autocomplete="tel" />
-          </div>
-          <div class="field">
-            <label for="f-interest">What are you interested in?</label>
-            <select id="f-interest" name="interest" multiple></select>
-          </div>
+        <div class="field">
+          <label for="f-phone">Phone <span class="optional">(optional)</span></label>
+          <input type="tel" id="f-phone" name="phone" autocomplete="tel" />
         </div>
         <div class="field">
           <label for="f-message">Tell me about your project</label>
@@ -84,29 +78,9 @@
     </div>
   </header>
 
-  <!-- ============ MAIN ROLODEX ============ -->
-  <section class="rolodex-section rolodex-main" aria-labelledby="main-rolodex-heading">
-    <div class="rolodex-header">
-      <h2 id="main-rolodex-heading">Featured Work</h2>
-      <div class="rolodex-controls">
-        <button class="rolodex-arrow" data-rolodex="main" data-dir="-1" aria-label="Scroll featured work left">‹</button>
-        <button class="rolodex-arrow" data-rolodex="main" data-dir="1" aria-label="Scroll featured work right">›</button>
-      </div>
-    </div>
-    <div class="rolodex-track" id="rolodex-main" tabindex="0" aria-label="Featured work carousel"></div>
-  </section>
-
-  <!-- ============ SECONDARY ROLODEX ============ -->
-  <section class="rolodex-section rolodex-secondary" aria-labelledby="secondary-rolodex-heading">
-    <div class="rolodex-header">
-      <h2 id="secondary-rolodex-heading">In the Studio</h2>
-      <div class="rolodex-controls">
-        <button class="rolodex-arrow" data-rolodex="secondary" data-dir="-1" aria-label="Scroll studio photos left">‹</button>
-        <button class="rolodex-arrow" data-rolodex="secondary" data-dir="1" aria-label="Scroll studio photos right">›</button>
-      </div>
-    </div>
-    <div class="rolodex-track" id="rolodex-secondary" tabindex="0" aria-label="In the studio carousel"></div>
-  </section>
+  <!-- ============ GALLERIES (populated from js/main.js) ============ -->
+  <section class="rolodex-section rolodex-main" data-gallery="featured" hidden></section>
+  <section class="rolodex-section rolodex-secondary" data-gallery="studio" hidden></section>
 
   <!-- ============ BIO ============ -->
   <section class="content-section bio-section" id="bio">
@@ -123,10 +97,26 @@
   <section class="content-section pricing-section" id="pricing">
     <div class="content-card">
       <h2 class="section-title">Pricing</h2>
-      <p class="section-subtitle">Every commission is quoted individually — these ranges are a starting point for conversation.</p>
+      <p class="section-subtitle" id="pricing-note"></p>
       <div class="pricing-grid" id="pricing-grid"></div>
     </div>
   </section>
+
+  <!-- ============ MY STONES GALLERY ============ -->
+  <section class="rolodex-section rolodex-secondary" data-gallery="stones" hidden></section>
+
+  <!-- ============ COLLABORATOR ============ -->
+  <section class="content-section collab-section" id="collaborator" hidden>
+    <div class="content-card collab-card">
+      <div class="collab-photo" id="collab-photo" aria-hidden="true"></div>
+      <div class="collab-text">
+        <p class="collab-eyebrow" id="collab-eyebrow">Collaborator</p>
+        <h2 id="collab-headline"></h2>
+        <p class="collab-bio" id="collab-bio"></p>
+      </div>
+    </div>
+  </section>
+  <section class="rolodex-section rolodex-secondary" data-gallery="silverRings" hidden></section>
 
   <!-- ============ FOOTER ============ -->
   <footer class="site-footer">
@@ -141,6 +131,7 @@
         <a id="footer-phone" href="#"></a>
       </div>
       <p class="footer-copy">© <span id="footer-year"></span> Cody Carlson. All rights reserved.</p>
+      <p class="footer-admin"><a href="/admin.html">Manage photos</a></p>
     </div>
   </footer>
 

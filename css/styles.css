@@ -5,9 +5,11 @@
 
 :root {
   --ink: #0d0c0b;
+  --ink-dim: rgba(21, 19, 16, 0.78);
   --cream: #f4efe6;
   --cream-dim: rgba(244, 239, 230, 0.72);
   --gold: #c8a869;
+  --gold-deep: #7a5a1e;
   --gold-soft: rgba(200, 168, 105, 0.16);
   --card-bg: rgba(24, 22, 20, 0.62);
   --card-border: rgba(244, 239, 230, 0.14);
@@ -19,6 +21,12 @@
 }
 
 * { box-sizing: border-box; }
+
+/* The `hidden` attribute must always win over any element's own `display`
+   rule (flex, grid, etc.) — without `!important` here, a class like
+   .content-section{display:flex} silently overrides the browser's default
+   [hidden]{display:none} and the "hidden" element renders anyway. */
+[hidden] { display: none !important; }
 
 html { scroll-behavior: smooth; }
 
@@ -87,9 +95,9 @@ img { max-width: 100%; display: block; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-size: 0.8rem;
-  color: var(--cream-dim);
+  color: var(--ink-dim);
   margin: 0 0 1.75rem;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 10px rgba(255, 255, 255, 0.35);
 }
 
 .books-open {
@@ -97,31 +105,31 @@ img { max-width: 100%; display: block; }
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1.1rem;
-  border: 1px solid var(--gold);
+  border: 1px solid var(--gold-deep);
   border-radius: 999px;
-  background: var(--gold-soft);
+  background: rgba(255, 255, 255, 0.35);
   margin-bottom: 0.9rem;
 }
 .books-open .dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #6fcf7d;
-  box-shadow: 0 0 0 4px rgba(111, 207, 125, 0.2);
+  background: #2f7d3d;
+  box-shadow: 0 0 0 4px rgba(47, 125, 61, 0.2);
 }
 .books-open-label {
   font-family: var(--serif);
   font-weight: 600;
   letter-spacing: 0.02em;
   font-size: 1rem;
-  color: var(--cream);
+  color: var(--ink);
 }
 
 .hero-sub {
   margin: 0 0 2rem;
-  color: var(--cream-dim);
+  color: var(--ink-dim);
   font-size: 0.95rem;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 10px rgba(255, 255, 255, 0.35);
 }
 
 .hero-heading {
@@ -130,16 +138,17 @@ img { max-width: 100%; display: block; }
   font-weight: 700;
   margin: 0 0 0.5rem;
   letter-spacing: 0.01em;
-  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
+  color: var(--ink);
+  text-shadow: 0 2px 18px rgba(255, 255, 255, 0.4);
 }
 
 .hero-discipline {
   font-size: 1.05rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold-deep);
   margin: 0 0 2.5rem;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 10px rgba(255, 255, 255, 0.35);
 }
 
 .hero-actions {
@@ -175,22 +184,19 @@ img { max-width: 100%; display: block; }
 .btn-primary:hover { box-shadow: 0 20px 40px -14px rgba(200, 168, 105, 0.45); }
 
 .btn-secondary {
-  background: rgba(244, 239, 230, 0.08);
-  color: var(--cream);
-  border-color: var(--card-border);
+  background: rgba(255, 255, 255, 0.4);
+  color: var(--ink);
+  border-color: rgba(21, 19, 16, 0.25);
   backdrop-filter: blur(6px);
 }
-.btn-secondary:hover { background: rgba(244, 239, 230, 0.14); }
+.btn-secondary:hover { background: rgba(255, 255, 255, 0.55); }
 
 /* ---------- Intake form ---------- */
+/* No card/box behind the form — fields float directly on the brighter
+   background photo, so copy here uses dark ink instead of light cream. */
 .intake-form {
   width: 100%;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius);
-  padding: 2rem;
-  backdrop-filter: blur(14px);
-  box-shadow: var(--shadow-lg);
+  padding: 2rem 0 0;
   text-align: left;
 }
 
@@ -199,6 +205,8 @@ img { max-width: 100%; display: block; }
   font-size: 1.3rem;
   margin: 0 0 1.25rem;
   text-align: center;
+  color: var(--ink);
+  text-shadow: 0 1px 10px rgba(255, 255, 255, 0.4);
 }
 
 .form-row {
@@ -213,29 +221,34 @@ img { max-width: 100%; display: block; }
 
 .field label {
   font-size: 0.85rem;
-  color: var(--cream-dim);
+  color: var(--ink-dim);
+  text-shadow: 0 1px 8px rgba(255, 255, 255, 0.4);
 }
 .field .optional { font-style: italic; opacity: 0.7; }
 
 .field input,
 .field select,
 .field textarea {
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(21, 19, 16, 0.2);
   border-radius: 8px;
   padding: 0.7rem 0.85rem;
-  color: var(--cream);
+  color: var(--ink);
   font-family: var(--sans);
   font-size: 0.95rem;
   resize: vertical;
+  backdrop-filter: blur(4px);
 }
-.field select[multiple] { min-height: 108px; }
+.field input::placeholder,
+.field textarea::placeholder {
+  color: rgba(21, 19, 16, 0.5);
+}
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
   outline: none;
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px var(--gold-soft);
+  border-color: var(--gold-deep);
+  box-shadow: 0 0 0 3px rgba(122, 90, 30, 0.25);
 }
 
 .btn-submit { width: 100%; justify-content: center; margin-top: 0.25rem; }
@@ -244,8 +257,9 @@ img { max-width: 100%; display: block; }
   margin: 0.75rem 0 0;
   font-size: 0.9rem;
   min-height: 1.2em;
-  color: var(--gold);
+  color: var(--gold-deep);
   text-align: center;
+  text-shadow: 0 1px 8px rgba(255, 255, 255, 0.4);
 }
 
 .scroll-cue {
@@ -257,17 +271,17 @@ img { max-width: 100%; display: block; }
   flex-direction: column;
   align-items: center;
   gap: 0.4rem;
-  color: var(--cream-dim);
+  color: var(--ink-dim);
   font-size: 0.75rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   animation: bob 2.4s ease-in-out infinite;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 8px rgba(255, 255, 255, 0.4);
 }
 .scroll-cue span {
   width: 1px;
   height: 28px;
-  background: linear-gradient(180deg, var(--gold), transparent);
+  background: linear-gradient(180deg, var(--gold-deep), transparent);
 }
 @keyframes bob {
   0%, 100% { transform: translate(-50%, 0); }
@@ -521,6 +535,45 @@ img { max-width: 100%; display: block; }
   font-size: 0.9rem;
   margin: 0;
 }
+.pricing-rate .tier-head { justify-content: center; }
+.rate-price {
+  font-size: 1.4rem;
+}
+.pricing-rate .tier-desc { text-align: center; }
+
+/* Collaborator */
+.collab-card {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+.collab-photo {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 10px;
+  background: linear-gradient(160deg, rgba(200,168,105,0.18), rgba(0,0,0,0.3));
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--card-border);
+}
+.collab-eyebrow {
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 0.5rem;
+}
+.collab-text h2 {
+  font-family: var(--serif);
+  font-size: 1.7rem;
+  margin: 0 0 1rem;
+}
+.collab-bio {
+  color: var(--cream-dim);
+  margin: 0;
+  font-size: 1rem;
+}
 
 /* ---------- Footer ---------- */
 .site-footer {
@@ -573,7 +626,10 @@ img { max-width: 100%; display: block; }
 .footer-contact a { color: var(--cream); text-decoration: none; }
 .footer-contact a:hover { color: var(--gold); }
 .footer-divider { margin: 0 0.6rem; color: var(--cream-dim); }
-.footer-copy { color: var(--cream-dim); font-size: 0.8rem; margin: 0; }
+.footer-copy { color: var(--cream-dim); font-size: 0.8rem; margin: 0 0 0.5rem; }
+.footer-admin { margin: 0; }
+.footer-admin a { color: var(--cream-dim); font-size: 0.75rem; text-decoration: underline; }
+.footer-admin a:hover { color: var(--gold); }
 
 /* ---------- Lightbox ---------- */
 .lightbox {
@@ -585,9 +641,6 @@ img { max-width: 100%; display: block; }
   justify-content: center;
   z-index: 100;
   padding: 2rem;
-}
-.lightbox[hidden] {
-  display: none;
 }
 .lightbox img {
   max-width: 100%;
@@ -612,7 +665,9 @@ img { max-width: 100%; display: block; }
   .form-row { grid-template-columns: 1fr; }
   .bio-card { grid-template-columns: 1fr; }
   .bio-photo { max-width: 220px; margin: 0 auto; }
-  .intake-form { padding: 1.5rem; }
+  .collab-card { grid-template-columns: 1fr; }
+  .collab-photo { max-width: 200px; margin: 0 auto; }
+  .intake-form { padding: 1.5rem 0 0; }
   .content-card { padding: 1.75rem; }
 }
 

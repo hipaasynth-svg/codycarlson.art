@@ -16,19 +16,8 @@
     document.getElementById('hero-heading').textContent = cfg.hero.heading;
     document.getElementById('hero-subheading').textContent = cfg.hero.subheading;
 
-    const callBtn = document.getElementById('call-btn');
-    callBtn.href = `tel:${cfg.contact.phone.replace(/[^\d+]/g, '')}`;
-
-    const emailBtn = document.getElementById('email-btn');
-    emailBtn.href = `mailto:${cfg.contact.email}`;
-
-    const interestSelect = document.getElementById('f-interest');
-    cfg.interests.forEach((label) => {
-      const opt = document.createElement('option');
-      opt.value = label;
-      opt.textContent = label;
-      interestSelect.appendChild(opt);
-    });
+    document.getElementById('call-btn').href = `tel:${cfg.contact.phone.replace(/[^\d+]/g, '')}`;
+    document.getElementById('email-btn').href = `mailto:${cfg.contact.email}`;
   }
 
   /* ---------------- Intake form ---------------- */
@@ -41,7 +30,6 @@
       const name = form.name.value.trim();
       const email = form.email.value.trim();
       const phone = form.phone.value.trim();
-      const interests = Array.from(form.interest.selectedOptions).map((o) => o.value);
       const message = form.message.value.trim();
 
       if (!name || !email) {
@@ -54,8 +42,8 @@
         try {
           const res = await fetch(cfg.form.endpoint, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, phone, interests, message }),
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ name, email, phone, message }),
           });
           if (!res.ok) throw new Error('Request failed');
           status.textContent = 'Thank you — your inquiry has been sent.';
@@ -72,7 +60,6 @@
         `Name: ${name}`,
         `Email: ${email}`,
         phone ? `Phone: ${phone}` : null,
-        interests.length ? `Interested in: ${interests.join(', ')}` : null,
         '',
         message || '(no message provided)',
       ].filter(Boolean);
@@ -82,88 +69,62 @@
     });
   }
 
-  /* ---------------- Rolodex carousels ---------------- */
-  function loadPhotos(storageKey, count) {
+  /* ---------------- Galleries ---------------- */
+  // Fetch the photo manifest saved from the admin page. If it isn't set up
+  // yet (or the request fails), fall back to an empty manifest so the public
+  // site degrades gracefully — empty galleries simply stay hidden.
+  async function loadManifest() {
     try {
-      const raw = JSON.parse(localStorage.getItem(storageKey) || '{}');
-      return raw;
+      const res = await fetch('/api/gallery', { cache: 'no-store' });
+      if (!res.ok) throw new Error('no manifest');
+      const data = await res.json();
+      return {
+        galleries: (data && data.galleries) || {},
+        collaborator: (data && data.collaborator) || null,
+      };
     } catch {
-      return {};
+      return { galleries: {}, collaborator: null };
     }
   }
 
-  function savePhotos(storageKey, photos) {
-    localStorage.setItem(storageKey, JSON.stringify(photos));
-  }
+  function buildGallery(section, key, photos) {
+    const meta = cfg.galleries[key];
+    if (!meta || !Array.isArray(photos) || photos.length === 0) return; // stays hidden
 
-  function buildRolodex({ trackId, storageKey, count, label }) {
-    const track = document.getElementById(trackId);
-    const photos = loadPhotos(storageKey, count);
+    section.innerHTML = `
+      <div class="rolodex-header">
+        <h2>${meta.heading}</h2>
+        <div class="rolodex-controls">
+          <button class="rolodex-arrow" data-dir="-1" aria-label="Scroll ${meta.heading} left">‹</button>
+          <button class="rolodex-arrow" data-dir="1" aria-label="Scroll ${meta.heading} right">›</button>
+        </div>
+      </div>
+      <div class="rolodex-track" tabindex="0" aria-label="${meta.heading} carousel"></div>
+    `;
+    const track = section.querySelector('.rolodex-track');
 
-    function renderSlot(index) {
+    photos.forEach((url, i) => {
       const card = document.createElement('div');
       card.className = 'rolodex-card';
-      card.dataset.index = String(index);
+      const media = document.createElement('div');
+      media.className = 'card-media';
+      media.style.backgroundImage = `url("${url}")`;
+      media.setAttribute('role', 'button');
+      media.setAttribute('tabindex', '0');
+      media.setAttribute('aria-label', `${meta.label} ${i + 1} — view larger`);
+      media.addEventListener('click', () => openLightbox(url));
+      media.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(url); }
+      });
+      card.appendChild(media);
+      track.appendChild(card);
+    });
 
-      const photoData = photos[index];
+    section.hidden = false;
+    wireTrack(track, section);
+  }
 
-      const indexTag = document.createElement('span');
-      indexTag.className = 'card-index';
-      indexTag.textContent = `${label} ${index + 1}`;
-      card.appendChild(indexTag);
-
-      if (photoData) {
-        const media = document.createElement('div');
-        media.className = 'card-media';
-        media.style.backgroundImage = `url("${photoData}")`;
-        media.addEventListener('click', () => openLightbox(photoData));
-        card.appendChild(media);
-
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'card-remove';
-        removeBtn.setAttribute('aria-label', 'Remove photo');
-        removeBtn.textContent = '×';
-        removeBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          delete photos[index];
-          savePhotos(storageKey, photos);
-          card.replaceWith(renderSlot(index));
-          updateDepth();
-        });
-        card.appendChild(removeBtn);
-      } else {
-        const upload = document.createElement('label');
-        upload.className = 'card-upload';
-        upload.innerHTML = `
-          <span class="plus">+</span>
-          <small>Upload Photo</small>
-        `;
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = () => {
-            photos[index] = reader.result;
-            savePhotos(storageKey, photos);
-            card.replaceWith(renderSlot(index));
-            updateDepth();
-          };
-          reader.readAsDataURL(file);
-        });
-        upload.appendChild(input);
-        card.appendChild(upload);
-      }
-
-      return card;
-    }
-
-    for (let i = 0; i < count; i++) {
-      track.appendChild(renderSlot(i));
-    }
-
+  function wireTrack(track, section) {
     function updateDepth() {
       const cards = Array.from(track.children);
       const trackRect = track.getBoundingClientRect();
@@ -186,68 +147,67 @@
     window.addEventListener('resize', updateDepth);
     updateDepth();
 
-    // Arrow controls
-    document.querySelectorAll(`.rolodex-arrow[data-rolodex="${trackId.replace('rolodex-', '')}"]`).forEach((btn) => {
+    section.querySelectorAll('.rolodex-arrow').forEach((btn) => {
       btn.addEventListener('click', () => {
         const dir = Number(btn.dataset.dir);
-        const cardWidth = track.firstElementChild ? track.firstElementChild.getBoundingClientRect().width + 24 : 300;
+        const first = track.firstElementChild;
+        const cardWidth = first ? first.getBoundingClientRect().width + 24 : 300;
         track.scrollBy({ left: dir * cardWidth, behavior: 'smooth' });
       });
     });
 
     // Desktop drag-to-scroll
-    let isDown = false;
-    let startX = 0;
-    let scrollStart = 0;
+    let isDown = false, startX = 0, scrollStart = 0;
     track.addEventListener('mousedown', (e) => {
-      isDown = true;
-      startX = e.pageX;
-      scrollStart = track.scrollLeft;
-      track.style.cursor = 'grabbing';
+      isDown = true; startX = e.pageX; scrollStart = track.scrollLeft; track.style.cursor = 'grabbing';
     });
-    window.addEventListener('mouseup', () => {
-      isDown = false;
-      track.style.cursor = '';
-    });
+    window.addEventListener('mouseup', () => { isDown = false; track.style.cursor = ''; });
     window.addEventListener('mousemove', (e) => {
       if (!isDown) return;
       track.scrollLeft = scrollStart - (e.pageX - startX);
     });
   }
 
-  function initRolodexes() {
-    buildRolodex({
-      trackId: 'rolodex-main',
-      storageKey: cfg.rolodex.main.storageKey,
-      count: cfg.rolodex.main.slots,
-      label: 'Piece',
+  function initGalleries(manifest) {
+    document.querySelectorAll('.rolodex-section[data-gallery]').forEach((section) => {
+      const key = section.dataset.gallery;
+      buildGallery(section, key, manifest.galleries[key] || []);
     });
-    buildRolodex({
-      trackId: 'rolodex-secondary',
-      storageKey: cfg.rolodex.secondary.storageKey,
-      count: cfg.rolodex.secondary.slots,
-      label: 'Studio',
-    });
+  }
+
+  /* ---------------- Collaborator ---------------- */
+  function initCollaborator(manifest) {
+    const data = manifest.collaborator || cfg.collaborator || {};
+    const headline = (data.headline || '').trim();
+    const bio = (data.bio || '').trim();
+    const photo = (data.photo || '').trim();
+    if (!headline && !bio && !photo) return; // nothing to show — stays hidden
+
+    document.getElementById('collab-eyebrow').textContent = (cfg.collaborator && cfg.collaborator.sectionHeading) || 'Collaborator';
+    document.getElementById('collab-headline').textContent = headline;
+    document.getElementById('collab-bio').textContent = bio;
+    const photoEl = document.getElementById('collab-photo');
+    if (photo) {
+      photoEl.style.backgroundImage = `url("${photo}")`;
+    } else {
+      photoEl.hidden = true;
+    }
+    document.getElementById('collaborator').hidden = false;
   }
 
   /* ---------------- Lightbox ---------------- */
   function openLightbox(src) {
     const lightbox = document.getElementById('lightbox');
-    const img = document.getElementById('lightbox-img');
-    img.src = src;
+    document.getElementById('lightbox-img').src = src;
     lightbox.hidden = false;
   }
-  function closeLightbox() {
-    document.getElementById('lightbox').hidden = true;
-  }
+  function closeLightbox() { document.getElementById('lightbox').hidden = true; }
   function initLightbox() {
     document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
     document.getElementById('lightbox').addEventListener('click', (e) => {
       if (e.target.id === 'lightbox') closeLightbox();
     });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeLightbox();
-    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
   }
 
   /* ---------------- Bio ---------------- */
@@ -266,6 +226,9 @@
 
   /* ---------------- Pricing ---------------- */
   function initPricing() {
+    const note = document.getElementById('pricing-note');
+    if (cfg.pricingNote) note.textContent = cfg.pricingNote;
+
     const grid = document.getElementById('pricing-grid');
     cfg.pricing.forEach((category) => {
       const col = document.createElement('div');
@@ -273,18 +236,31 @@
       const h3 = document.createElement('h3');
       h3.textContent = category.category;
       col.appendChild(h3);
-      category.tiers.forEach((tier) => {
+
+      if (Array.isArray(category.tiers)) {
+        category.tiers.forEach((tier) => {
+          const row = document.createElement('div');
+          row.className = 'pricing-tier';
+          row.innerHTML = `
+            <div class="tier-head">
+              <span class="tier-name">${tier.name}</span>
+              <span class="tier-price">${tier.price}</span>
+            </div>
+            <p class="tier-desc">${tier.description}</p>
+          `;
+          col.appendChild(row);
+        });
+      } else if (category.rate) {
         const row = document.createElement('div');
-        row.className = 'pricing-tier';
+        row.className = 'pricing-tier pricing-rate';
         row.innerHTML = `
           <div class="tier-head">
-            <span class="tier-name">${tier.name}</span>
-            <span class="tier-price">${tier.price}</span>
+            <span class="tier-price rate-price">${category.rate}</span>
           </div>
-          <p class="tier-desc">${tier.description}</p>
+          ${category.description ? `<p class="tier-desc">${category.description}</p>` : ''}
         `;
         col.appendChild(row);
-      });
+      }
       grid.appendChild(col);
     });
   }
@@ -321,14 +297,17 @@
   }
 
   /* ---------------- Init ---------------- */
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     initBackground();
     initHero();
     initForm();
-    initRolodexes();
     initLightbox();
     initBio();
     initPricing();
     initFooter();
+
+    const manifest = await loadManifest();
+    initGalleries(manifest);
+    initCollaborator(manifest);
   });
 })();
