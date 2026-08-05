@@ -81,9 +81,10 @@
       return {
         galleries: (data && data.galleries) || {},
         collaborator: (data && data.collaborator) || null,
+        bio: (data && data.bio) || null,
       };
     } catch {
-      return { galleries: {}, collaborator: null };
+      return { galleries: {}, collaborator: null, bio: null };
     }
   }
 
@@ -219,8 +220,12 @@
       p.textContent = text;
       container.appendChild(p);
     });
-    if (cfg.bio.photo) {
-      document.getElementById('bio-photo').style.backgroundImage = `url("${cfg.bio.photo}")`;
+  }
+
+  function applyBioPhoto(manifest) {
+    const photo = (manifest.bio && manifest.bio.photo) || cfg.bio.photo;
+    if (photo) {
+      document.getElementById('bio-photo').style.backgroundImage = `url("${photo}")`;
     }
   }
 
@@ -309,5 +314,6 @@
     const manifest = await loadManifest();
     initGalleries(manifest);
     initCollaborator(manifest);
+    applyBioPhoto(manifest);
   });
 })();

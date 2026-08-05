@@ -120,6 +120,8 @@
   background: rgba(255, 255, 255, 0.03);
 }
 
+.admin-bio-slot { max-width: 180px; }
+
 .admin-photo-slot img {
   width: 100%;
   height: 100%;

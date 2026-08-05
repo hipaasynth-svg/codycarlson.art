@@ -31,7 +31,10 @@ export default async function handler(req, res) {
     bio: typeof collab.bio === 'string' ? collab.bio.slice(0, 2000) : '',
   };
 
-  const manifest = { galleries, collaborator };
+  const bioIn = body.bio || {};
+  const bio = { photo: typeof bioIn.photo === 'string' ? bioIn.photo : '' };
+
+  const manifest = { galleries, collaborator, bio };
 
   try {
     await put(MANIFEST_PATH, JSON.stringify(manifest), {

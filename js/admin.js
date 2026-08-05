@@ -5,6 +5,7 @@
   const state = {
     galleries: { featured: [], studio: [], stones: [], silverRings: [] },
     collaborator: { photo: '', headline: '', bio: '' },
+    bio: { photo: '' },
   };
 
   function authHeaders() {
@@ -49,7 +50,8 @@
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      throw new Error(body.error || 'Upload failed');
+      const message = [body.error, body.detail].filter(Boolean).join(': ') || `Upload failed (${res.status})`;
+      throw new Error(message);
     }
     const { url } = await res.json();
     return url;
@@ -102,7 +104,8 @@
           renderGallery(key);
         } catch (err) {
           empty.classList.remove('is-uploading');
-          empty.querySelector('small').textContent = 'Failed — try again';
+          empty.querySelector('small').textContent = (err && err.message) || 'Failed — try again';
+          empty.title = (err && err.message) || '';
         }
       });
       empty.appendChild(input);
@@ -141,14 +144,19 @@
     });
   }
 
-  function renderCollabPhoto() {
-    const slot = document.getElementById('collab-photo-slot');
+  // Generic single-photo-slot editor, shared by the bio photo and the
+  // collaborator photo — both are "one optional image" fields rather than
+  // galleries. `getPhoto`/`setPhoto` read and write the relevant state slice.
+  function renderSinglePhoto(slotId, altText, folder, getPhoto, setPhoto) {
+    const slot = document.getElementById(slotId);
     slot.innerHTML = '';
+    const rerender = () => renderSinglePhoto(slotId, altText, folder, getPhoto, setPhoto);
 
-    if (state.collaborator.photo) {
+    const photo = getPhoto();
+    if (photo) {
       const img = document.createElement('img');
-      img.src = state.collaborator.photo;
-      img.alt = 'Collaborator photo';
+      img.src = photo;
+      img.alt = altText;
       slot.appendChild(img);
 
       const removeBtn = document.createElement('button');
@@ -157,8 +165,8 @@
       removeBtn.setAttribute('aria-label', 'Remove photo');
       removeBtn.textContent = '×';
       removeBtn.addEventListener('click', () => {
-        state.collaborator.photo = '';
-        renderCollabPhoto();
+        setPhoto('');
+        rerender();
       });
       slot.appendChild(removeBtn);
     } else {
@@ -174,17 +182,32 @@
         empty.classList.add('is-uploading');
         empty.querySelector('small').textContent = 'Uploading…';
         try {
-          const url = await uploadFile(file, 'collaborator');
-          state.collaborator.photo = url;
-          renderCollabPhoto();
+          const url = await uploadFile(file, folder);
+          setPhoto(url);
+          rerender();
         } catch (err) {
           empty.classList.remove('is-uploading');
-          empty.querySelector('small').textContent = 'Failed — try again';
+          empty.querySelector('small').textContent = (err && err.message) || 'Failed — try again';
+          empty.title = (err && err.message) || '';
         }
       });
       empty.appendChild(input);
       slot.appendChild(empty);
     }
+  }
+
+  function renderCollabPhoto() {
+    renderSinglePhoto(
+      'collab-photo-slot', 'Collaborator photo', 'collaborator',
+      () => state.collaborator.photo, (url) => { state.collaborator.photo = url; },
+    );
+  }
+
+  function renderBioPhoto() {
+    renderSinglePhoto(
+      'bio-photo-slot', 'Artist bio photo', 'bio',
+      () => state.bio.photo, (url) => { state.bio.photo = url; },
+    );
   }
 
   /* ---------------- Save ---------------- */
@@ -198,10 +221,14 @@
           headers: { 'Content-Type': 'application/json', ...authHeaders() },
           body: JSON.stringify(state),
         });
-        if (!res.ok) throw new Error('Save failed');
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          const message = [body.error, body.detail].filter(Boolean).join(': ') || `Save failed (${res.status})`;
+          throw new Error(message);
+        }
         status.textContent = 'Saved! The live site is now updated.';
       } catch (err) {
-        status.textContent = 'Something went wrong saving. Please try again.';
+        status.textContent = `Save failed: ${(err && err.message) || 'unknown error'}`;
       }
     });
   }
@@ -222,6 +249,9 @@
           bio: data.collaborator.bio || '',
         };
       }
+      if (data.bio) {
+        state.bio = { photo: data.bio.photo || '' };
+      }
     } catch {
       // Start from empty state if the manifest can't be loaded.
     }
@@ -233,6 +263,7 @@
     dashboard.hidden = false;
     await loadManifest();
     buildGalleryEditors();
+    renderBioPhoto();
     initCollabEditor();
     initSave();
   }
