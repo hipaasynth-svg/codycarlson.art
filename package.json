@@ -1,0 +1,10 @@
+{
+  "name": "codycarlson-art",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Single-page artist site for Cody Carlson, with a small serverless admin for managing gallery photos.",
+  "dependencies": {
+    "@vercel/blob": "^2.6.1"
+  }
+}
