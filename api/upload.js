@@ -50,6 +50,12 @@ export default async function handler(req, res) {
     });
     res.status(200).json({ url: blob.url });
   } catch (err) {
-    res.status(500).json({ error: 'Upload failed', detail: String(err && err.message || err) });
+    const message = String((err && err.message) || err);
+    // The most common setup mistake: no Vercel Blob store connected, so there's
+    // no BLOB_READ_WRITE_TOKEN. Translate that into a plain-language hint.
+    const detail = /token/i.test(message)
+      ? 'No Blob storage connected. In the Vercel project, open the Storage tab, create a Blob store, connect it to this project, then redeploy.'
+      : message;
+    res.status(500).json({ error: 'Upload failed', detail });
   }
 }
