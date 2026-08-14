@@ -50,6 +50,8 @@
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
+      // Surface the real reason (e.g. "No Blob store connected") instead of a
+      // generic failure, so setup problems are self-explanatory.
       const message = [body.error, body.detail].filter(Boolean).join(': ') || `Upload failed (${res.status})`;
       throw new Error(message);
     }
