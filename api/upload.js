@@ -4,7 +4,7 @@
 import { put } from '@vercel/blob';
 import { isAuthorized } from './_auth.js';
 
-const ALLOWED_FOLDERS = new Set(['featured', 'studio', 'stones', 'silverRings', 'collaborator']);
+const ALLOWED_FOLDERS = new Set(['featured', 'studio', 'stones', 'silverRings', 'collaborator', 'bio']);
 const MAX_DECODED_BYTES = 8 * 1024 * 1024; // 8MB safety cap after decoding
 
 export default async function handler(req, res) {

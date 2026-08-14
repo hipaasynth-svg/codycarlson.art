@@ -9,6 +9,7 @@ export const MANIFEST_PATH = 'data/manifest.json';
 export const EMPTY_MANIFEST = {
   galleries: { featured: [], studio: [], stones: [], silverRings: [] },
   collaborator: { photo: '', headline: '', bio: '' },
+  bio: { photo: '' },
 };
 
 export async function readManifest() {
@@ -20,6 +21,7 @@ export async function readManifest() {
     return {
       galleries: { ...EMPTY_MANIFEST.galleries, ...(data.galleries || {}) },
       collaborator: { ...EMPTY_MANIFEST.collaborator, ...(data.collaborator || {}) },
+      bio: { ...EMPTY_MANIFEST.bio, ...(data.bio || {}) },
     };
   } catch {
     // No manifest saved yet — that's expected before the first Save.
