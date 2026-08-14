@@ -49,7 +49,10 @@
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      throw new Error(body.error || 'Upload failed');
+      // Surface the real reason (e.g. "No Blob store connected") instead of a
+      // generic failure, so setup problems are self-explanatory.
+      const reason = [body.error, body.detail].filter(Boolean).join(': ');
+      throw new Error(reason || `Upload failed (HTTP ${res.status})`);
     }
     const { url } = await res.json();
     return url;
@@ -102,7 +105,8 @@
           renderGallery(key);
         } catch (err) {
           empty.classList.remove('is-uploading');
-          empty.querySelector('small').textContent = 'Failed — try again';
+          empty.querySelector('small').textContent = err.message || 'Failed — try again';
+          empty.title = err.message || '';
         }
       });
       empty.appendChild(input);
@@ -179,7 +183,8 @@
           renderCollabPhoto();
         } catch (err) {
           empty.classList.remove('is-uploading');
-          empty.querySelector('small').textContent = 'Failed — try again';
+          empty.querySelector('small').textContent = err.message || 'Failed — try again';
+          empty.title = err.message || '';
         }
       });
       empty.appendChild(input);
