@@ -1,17 +1,28 @@
 // Creates a Stripe Checkout Session for a finished "Available Now" piece and
 // returns its hosted-checkout URL, which the site redirects the buyer to.
 //
-// Setup: set STRIPE_SECRET_KEY in the Vercel project's Environment Variables
-// (same place as ADMIN_PASSWORD). Each piece's amount is controlled by the
-// Stripe Price you create in the dashboard and reference by `stripePriceId`
-// in js/config.js — the browser only sends the Price ID, never an amount, so
-// a visitor can't change what they're charged.
-//
-// Prefer this route when you want buyers to stay on codycarlson.art. If you'd
-// rather not manage a secret key at all, use a Stripe Payment Link instead
-// (set `buyUrl` on the piece in js/config.js) — that path never touches this
-// function.
+// The amount charged is derived SERVER-SIDE from the piece in the saved
+// manifest — the browser only sends the piece's id, never a price — so a
+// visitor can't change what they're charged. In order of preference for a
+// piece, this uses:
+//   1. its `stripePriceId` (a Price you made in the Stripe Dashboard), else
+//   2. the `price` you typed in /admin (e.g. "$1,200"), charged as-is.
+// So just adding a photo + price in /admin makes a piece buyable — no Stripe
+// dashboard work needed. (Setting STRIPE_SECRET_KEY in the Vercel project is
+// still required for on-site checkout; a Stripe Payment Link `buyUrl` bypasses
+// this route entirely.)
 import Stripe from 'stripe';
+import { readManifest } from './_manifest.js';
+
+// "$1,200" -> 120000 (cents). Returns null if it can't be parsed to a usable
+// amount. Stripe's minimum charge is 50 cents.
+function priceToCents(str) {
+  if (typeof str !== 'string') return null;
+  const n = parseFloat(str.replace(/[^0-9.]/g, ''));
+  if (!isFinite(n) || n <= 0) return null;
+  const cents = Math.round(n * 100);
+  return cents >= 50 ? cents : null;
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -28,15 +39,49 @@ export default async function handler(req, res) {
   }
 
   const body = req.body || {};
-  const priceId = typeof body.priceId === 'string' ? body.priceId.trim() : '';
-  const title = typeof body.title === 'string' ? body.title.slice(0, 200) : '';
   const pieceId = typeof body.pieceId === 'string' ? body.pieceId.slice(0, 64) : '';
-
-  // Stripe Price IDs always look like "price_…". Reject anything else before
-  // calling Stripe so bad input gets a clean 400 instead of a Stripe error.
-  if (!/^price_[A-Za-z0-9]+$/.test(priceId)) {
-    res.status(400).json({ error: 'Invalid or missing priceId.' });
+  if (!pieceId) {
+    res.status(400).json({ error: 'Missing pieceId.' });
     return;
+  }
+
+  // Look the piece up in the saved manifest — the trusted source of its price.
+  let piece = null;
+  try {
+    const manifest = await readManifest();
+    piece = (manifest.paintings || []).find((p) => p && p.id === pieceId) || null;
+  } catch {
+    res.status(500).json({ error: 'Could not load inventory.' });
+    return;
+  }
+  if (!piece) {
+    res.status(404).json({ error: 'Piece not found.' });
+    return;
+  }
+  if ((piece.status || 'available').toLowerCase() !== 'available') {
+    res.status(409).json({ error: 'This piece is no longer available.' });
+    return;
+  }
+
+  // Build the line item: a preset Stripe Price wins; otherwise charge the
+  // typed price. Both come from the server-side manifest, never the client.
+  let lineItem = null;
+  if (typeof piece.stripePriceId === 'string' && /^price_[A-Za-z0-9]+$/.test(piece.stripePriceId)) {
+    lineItem = { price: piece.stripePriceId, quantity: 1 };
+  } else {
+    const cents = priceToCents(piece.price);
+    if (!cents) {
+      res.status(400).json({ error: 'This piece has no valid price set.' });
+      return;
+    }
+    lineItem = {
+      price_data: {
+        currency: 'usd',
+        unit_amount: cents,
+        product_data: { name: piece.title || 'Original artwork' },
+      },
+      quantity: 1,
+    };
   }
 
   const proto = (req.headers['x-forwarded-proto'] || 'https').toString().split(',')[0];
@@ -47,17 +92,13 @@ export default async function handler(req, res) {
     const stripe = new Stripe(secret);
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      line_items: [{ price: priceId, quantity: 1 }],
-      // Physical, one-of-a-kind art — collect a shipping address and cap
-      // quantity at one so the same piece can't be bought twice in a cart.
+      line_items: [lineItem],
+      // Physical, one-of-a-kind art — collect a shipping address.
       shipping_address_collection: { allowed_countries: ['US', 'CA'] },
       success_url: `${origin}/?purchase=success`,
       cancel_url: `${origin}/?purchase=cancel`,
       // Stamp the piece so the webhook can flip exactly this piece to "sold".
-      metadata: {
-        ...(title ? { piece: title } : {}),
-        ...(pieceId ? { pieceId } : {}),
-      },
+      metadata: { pieceId, ...(piece.title ? { piece: piece.title } : {}) },
     });
     res.status(200).json({ url: session.url });
   } catch (err) {

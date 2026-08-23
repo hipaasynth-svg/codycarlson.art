@@ -213,6 +213,19 @@
   font-size: 0.9rem;
 }
 .admin-hint { color: var(--gold); font-style: italic; opacity: 0.85; }
+.admin-advanced { margin-top: 0.2rem; }
+.admin-advanced summary {
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--cream-dim);
+  padding: 0.3rem 0;
+}
+.admin-advanced summary:hover { color: var(--gold); }
+.admin-advanced label { margin-top: 0.6rem; }
+.admin-painting-draft {
+  border-style: dashed;
+  border-color: var(--gold-deep);
+}
 
 /* ---------- Collaborator ---------- */
 .admin-collab-grid {

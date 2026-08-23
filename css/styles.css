@@ -557,28 +557,32 @@ img { max-width: 100%; display: block; }
 }
 .pricing-rate .tier-desc { text-align: center; }
 
-/* Available Now — paintings store */
-.available-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 1.75rem;
+/* Available Now — paintings store, shown as a rolodex carousel */
+.available-intro {
+  text-align: center;
+  color: var(--cream-dim);
+  font-size: 0.95rem;
+  max-width: 640px;
+  margin: -0.5rem auto 0.5rem;
+  padding: 0 1.75rem;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
 }
-.piece-card {
+/* A store card is a rolodex card that stacks a large photo over a caption
+   (title / price / buy), instead of the pure-photo gallery card. */
+.piece-slide {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.25);
+  width: min(78vw, 340px);
+  height: auto;
 }
-.piece-media {
+.piece-slide .card-media {
   position: relative;
-  aspect-ratio: 4/5;
-  background-size: cover;
-  background-position: center;
+  inset: auto;
+  height: min(86vw, 340px);
+  flex: 0 0 auto;
   cursor: zoom-in;
 }
-.piece-media.is-empty {
+.piece-slide .card-media.is-empty {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -587,6 +591,10 @@ img { max-width: 100%; display: block; }
   font-size: 0.85rem;
   letter-spacing: 0.03em;
   background: linear-gradient(160deg, rgba(200,168,105,0.14), rgba(0,0,0,0.35));
+}
+@media (min-width: 900px) {
+  .available-section .piece-slide { width: 320px; }
+  .available-section .piece-slide .card-media { height: 320px; }
 }
 .piece-ribbon {
   position: absolute;

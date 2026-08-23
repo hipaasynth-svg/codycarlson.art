@@ -88,12 +88,16 @@
   <section class="rolodex-section rolodex-main" data-gallery="featured" hidden></section>
 
   <!-- ============ AVAILABLE NOW (populated from js/main.js) ============ -->
-  <section class="content-section available-section" id="available" hidden>
-    <div class="content-card">
-      <h2 class="section-title" id="available-heading"></h2>
-      <p class="section-subtitle" id="available-intro"></p>
-      <div class="available-grid" id="available-grid"></div>
+  <section class="rolodex-section available-section" id="available" hidden>
+    <div class="rolodex-header">
+      <h2 id="available-heading"></h2>
+      <div class="rolodex-controls">
+        <button class="rolodex-arrow" data-dir="-1" aria-label="Scroll available work left">‹</button>
+        <button class="rolodex-arrow" data-dir="1" aria-label="Scroll available work right">›</button>
+      </div>
     </div>
+    <p class="available-intro" id="available-intro"></p>
+    <div class="rolodex-track" id="available-track" tabindex="0" aria-label="Available work carousel"></div>
   </section>
 
   <section class="rolodex-section rolodex-secondary" data-gallery="studio" hidden></section>

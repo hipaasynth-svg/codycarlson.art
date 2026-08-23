@@ -196,8 +196,14 @@
   }
 
   /* ---------------- Paintings-for-sale editor ---------------- */
-  // Each painting is { url, title, price, buyUrl, stripePriceId, status }.
-  // A slot only "counts" once it has a photo; empty slots are dropped on save.
+  // Each painting is { id, url, title, price, buyUrl, stripePriceId, status }.
+  // The typed Price is what a buyer is charged (via /api/checkout), so a photo
+  // + price is all a piece needs — the Stripe fields are optional overrides.
+  function blankPainting() {
+    return { id: newId(), url: '', title: '', price: '', buyUrl: '', stripePriceId: '', status: 'available' };
+  }
+  let paintingDraft = blankPainting();
+
   function renderPaintings() {
     const meta = cfg.paintings || { max: 18, label: 'Painting' };
     const container = document.getElementById('paintings-editor');
@@ -208,34 +214,48 @@
       container.appendChild(buildPaintingCard(piece, index, meta));
     });
 
+    // Always show one "add a piece" card with its fields visible, so it's
+    // obvious where the work and its price go.
     if (state.paintings.length < meta.max) {
-      const addCard = document.createElement('div');
-      addCard.className = 'admin-painting-card admin-painting-add';
-      const empty = document.createElement('label');
-      empty.className = 'admin-photo-empty';
-      empty.innerHTML = `<span class="plus">+</span><small>Add Painting</small>`;
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        empty.classList.add('is-uploading');
-        empty.querySelector('small').textContent = 'Uploading…';
-        try {
-          const url = await uploadFile(file, 'paintings');
-          state.paintings.push({ id: newId(), url, title: '', price: '', buyUrl: '', stripePriceId: '', status: 'available' });
-          renderPaintings();
-        } catch (err) {
-          empty.classList.remove('is-uploading');
-          empty.querySelector('small').textContent = (err && err.message) || 'Failed — try again';
-          empty.title = (err && err.message) || '';
-        }
-      });
-      empty.appendChild(input);
-      addCard.appendChild(empty);
-      container.appendChild(addCard);
+      container.appendChild(buildDraftCard());
     }
+  }
+
+  // Builds the editable fields, writing every change straight onto `target`
+  // (a saved piece object, or the not-yet-added draft).
+  function paintingFields(target) {
+    const fields = document.createElement('div');
+    fields.className = 'admin-painting-fields';
+    fields.innerHTML = `
+      <label>Title <input type="text" data-k="title" maxlength="200" placeholder="e.g. Summer Walleye" /></label>
+      <label>Price <span class="admin-hint">(shown to buyers &amp; charged at checkout)</span>
+        <input type="text" data-k="price" maxlength="60" placeholder="e.g. $1,200" />
+      </label>
+      <label>Status
+        <select data-k="status">
+          <option value="available">Available</option>
+          <option value="reserved">Reserved</option>
+          <option value="sold">Sold</option>
+        </select>
+      </label>
+      <details class="admin-advanced">
+        <summary>Advanced Stripe options (optional)</summary>
+        <label>Stripe Payment Link
+          <input type="url" data-k="buyUrl" maxlength="500" placeholder="https://buy.stripe.com/…" />
+        </label>
+        <label>Stripe Price ID
+          <input type="text" data-k="stripePriceId" maxlength="200" placeholder="price_…" />
+        </label>
+      </details>
+    `;
+    fields.querySelectorAll('[data-k]').forEach((input) => {
+      const key = input.dataset.k;
+      input.value = target[key] || (key === 'status' ? 'available' : '');
+      const write = () => { target[key] = input.value; };
+      input.addEventListener('input', write);
+      input.addEventListener('change', write);
+    });
+    return fields;
   }
 
   function buildPaintingCard(piece, index, meta) {
@@ -260,32 +280,46 @@
     slot.appendChild(removeBtn);
     card.appendChild(slot);
 
-    const fields = document.createElement('div');
-    fields.className = 'admin-painting-fields';
-    fields.innerHTML = `
-      <label>Title <input type="text" data-k="title" maxlength="200" placeholder="e.g. Summer Walleye" /></label>
-      <label>Price (shown to buyers) <input type="text" data-k="price" maxlength="60" placeholder="e.g. $1,200" /></label>
-      <label>Status
-        <select data-k="status">
-          <option value="available">Available</option>
-          <option value="reserved">Reserved</option>
-          <option value="sold">Sold</option>
-        </select>
-      </label>
-      <label>Stripe Payment Link <span class="admin-hint">(easiest — no setup)</span>
-        <input type="url" data-k="buyUrl" maxlength="500" placeholder="https://buy.stripe.com/…" />
-      </label>
-      <label>or Stripe Price ID <span class="admin-hint">(for on-site checkout)</span>
-        <input type="text" data-k="stripePriceId" maxlength="200" placeholder="price_…" />
-      </label>
-    `;
-    fields.querySelectorAll('[data-k]').forEach((input) => {
-      const key = input.dataset.k;
-      input.value = piece[key] || (key === 'status' ? 'available' : '');
-      input.addEventListener('input', () => { state.paintings[index][key] = input.value; });
-      input.addEventListener('change', () => { state.paintings[index][key] = input.value; });
+    card.appendChild(paintingFields(piece));
+    return card;
+  }
+
+  // The trailing "add a piece" card: fields are always visible so the price
+  // spot is obvious; uploading a photo commits the draft as a real piece.
+  function buildDraftCard() {
+    const card = document.createElement('div');
+    card.className = 'admin-painting-card admin-painting-draft';
+
+    const slot = document.createElement('div');
+    slot.className = 'admin-photo-slot admin-painting-photo';
+    const empty = document.createElement('label');
+    empty.className = 'admin-photo-empty';
+    empty.innerHTML = `<span class="plus">+</span><small>Add Photo</small>`;
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      empty.classList.add('is-uploading');
+      empty.querySelector('small').textContent = 'Uploading…';
+      try {
+        const url = await uploadFile(file, 'paintings');
+        paintingDraft.url = url;
+        state.paintings.push({ ...paintingDraft });
+        paintingDraft = blankPainting();
+        renderPaintings();
+      } catch (err) {
+        empty.classList.remove('is-uploading');
+        empty.querySelector('small').textContent = (err && err.message) || 'Failed — try again';
+        empty.title = (err && err.message) || '';
+      }
     });
-    card.appendChild(fields);
+    empty.appendChild(input);
+    slot.appendChild(empty);
+    card.appendChild(slot);
+
+    card.appendChild(paintingFields(paintingDraft));
     return card;
   }
 
