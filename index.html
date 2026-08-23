@@ -16,6 +16,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
+  <!-- Warm up the connection to the photo host (Vercel Blob) so gallery/store
+       images fetch faster, and preload the full-screen background (the biggest
+       first-paint asset). -->
+  <link rel="preconnect" href="https://zlm0ewd384883ohc.public.blob.vercel-storage.com" crossorigin>
+  <link rel="preload" as="image" href="assets/images/IMG_0448.jpeg" fetchpriority="high" />
+
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>

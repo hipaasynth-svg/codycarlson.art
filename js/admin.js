@@ -440,7 +440,9 @@
   /* ---------------- Load existing manifest ---------------- */
   async function loadManifest() {
     try {
-      const res = await fetch('/api/gallery', { cache: 'no-store' });
+      // Cache-busting query bypasses the edge cache so the admin always loads
+      // the very latest saved manifest.
+      const res = await fetch(`/api/gallery?t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) return;
       const data = await res.json();
       Object.keys(state.galleries).forEach((key) => {

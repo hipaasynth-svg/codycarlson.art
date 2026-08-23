@@ -1,6 +1,35 @@
 (() => {
   const cfg = window.SITE_CONFIG;
 
+  /* ---------------- Lazy image loading ---------------- */
+  // Gallery and store photos are set as CSS background images. Rather than
+  // downloading all of them (most are off-screen or in a horizontal carousel)
+  // on first load, defer each until it's about to scroll into view. This cuts
+  // the initial page weight to just the background plus whatever's on screen.
+  let _imgObserver = null;
+  function lazyBackground(el, url) {
+    if (!url) return;
+    if (!('IntersectionObserver' in window)) {
+      el.style.backgroundImage = `url("${url}")`;
+      return;
+    }
+    el.dataset.lazyBg = url;
+    if (!_imgObserver) {
+      _imgObserver = new IntersectionObserver((entries, obs) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const target = entry.target;
+          if (target.dataset.lazyBg) {
+            target.style.backgroundImage = `url("${target.dataset.lazyBg}")`;
+            delete target.dataset.lazyBg;
+          }
+          obs.unobserve(target);
+        });
+      }, { rootMargin: '300px' });
+    }
+    _imgObserver.observe(el);
+  }
+
   /* ---------------- Background ---------------- */
   // `?bg=...` forces a single image and disables the slideshow (handy for
   // quick previews). Otherwise we start with the config fallback image, then
@@ -165,7 +194,7 @@
     const media = document.createElement('div');
     media.className = 'card-media piece-slide-media';
     if (img) {
-      media.style.backgroundImage = `url("${img}")`;
+      lazyBackground(media, img);
       media.setAttribute('role', 'button');
       media.setAttribute('tabindex', '0');
       media.setAttribute('aria-label', `${piece.title || 'Piece'} — view larger`);
@@ -334,7 +363,7 @@
       card.className = 'rolodex-card';
       const media = document.createElement('div');
       media.className = 'card-media';
-      media.style.backgroundImage = `url("${url}")`;
+      lazyBackground(media, url);
       media.setAttribute('role', 'button');
       media.setAttribute('tabindex', '0');
       media.setAttribute('aria-label', `${meta.label} ${i + 1} — view larger`);
