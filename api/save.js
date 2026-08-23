@@ -42,6 +42,7 @@ export default async function handler(req, res) {
       id: (typeof p.id === 'string' && p.id) ? p.id.slice(0, 64) : newId(),
       url: p.url,
       title: str(p.title, 200),
+      size: str(p.size, 60),
       price: str(p.price, 60),
       buyUrl: str(p.buyUrl, 500),
       stripePriceId: str(p.stripePriceId, 200),

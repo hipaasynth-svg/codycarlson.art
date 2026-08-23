@@ -200,7 +200,7 @@
   // The typed Price is what a buyer is charged (via /api/checkout), so a photo
   // + price is all a piece needs — the Stripe fields are optional overrides.
   function blankPainting() {
-    return { id: newId(), url: '', title: '', price: '', buyUrl: '', stripePriceId: '', status: 'available' };
+    return { id: newId(), url: '', title: '', size: '', price: '', buyUrl: '', stripePriceId: '', status: 'available' };
   }
   let paintingDraft = blankPainting();
 
@@ -228,8 +228,14 @@
     fields.className = 'admin-painting-fields';
     fields.innerHTML = `
       <label>Title <input type="text" data-k="title" maxlength="200" placeholder="e.g. Summer Walleye" /></label>
-      <label>Price <span class="admin-hint">(shown to buyers &amp; charged at checkout)</span>
-        <input type="text" data-k="price" maxlength="60" placeholder="e.g. $1,200" />
+      <label>Dimensions <span class="admin-hint">(optional)</span>
+        <input type="text" data-k="size" maxlength="60" placeholder='e.g. 27&quot; or 38&quot; × 24&quot;' />
+      </label>
+      <label>Price <span class="admin-hint">(charged at checkout)</span>
+        <span class="admin-price-input">
+          <span class="admin-price-prefix" aria-hidden="true">$</span>
+          <input type="text" data-k="price" inputmode="decimal" maxlength="60" placeholder="1,200" />
+        </span>
       </label>
       <label>Status
         <select data-k="status">
@@ -250,7 +256,12 @@
     `;
     fields.querySelectorAll('[data-k]').forEach((input) => {
       const key = input.dataset.k;
-      input.value = target[key] || (key === 'status' ? 'available' : '');
+      // The price field shows a separate "$" prefix, so don't double it up.
+      if (key === 'price') {
+        input.value = String(target.price || '').replace(/^\s*\$\s*/, '');
+      } else {
+        input.value = target[key] || (key === 'status' ? 'available' : '');
+      }
       const write = () => { target[key] = input.value; };
       input.addEventListener('input', write);
       input.addEventListener('change', write);
@@ -440,6 +451,7 @@
         id: (p && p.id) || newId(),
         url: (p && p.url) || '',
         title: (p && p.title) || '',
+        size: (p && p.size) || '',
         price: (p && p.price) || '',
         buyUrl: (p && p.buyUrl) || '',
         stripePriceId: (p && p.stripePriceId) || '',

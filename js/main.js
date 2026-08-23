@@ -192,7 +192,7 @@
       <h3 class="piece-title">${escapeHtml(piece.title || 'Untitled')}</h3>
       ${meta ? `<p class="piece-meta">${escapeHtml(meta)}</p>` : ''}
       <div class="piece-foot">
-        <span class="piece-price">${piece.price ? escapeHtml(piece.price) : 'Inquire for price'}</span>
+        <span class="piece-price">${piece.price ? escapeHtml(formatPrice(piece.price)) : 'Inquire for price'}</span>
       </div>
     `;
     body.querySelector('.piece-foot').appendChild(buildBuyButton(piece, soldOut));
@@ -251,6 +251,13 @@
     btn.textContent = 'Reserve this piece';
     btn.addEventListener('click', () => prefillInquiry(piece.title || 'this piece'));
     return btn;
+  }
+
+  // Show the price with a leading "$" unless the artist already typed a
+  // currency symbol, so prices always read as dollars.
+  function formatPrice(price) {
+    const t = String(price).trim();
+    return /^[$€£]/.test(t) ? t : `$${t}`;
   }
 
   function escapeHtml(str) {
