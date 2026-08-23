@@ -169,6 +169,51 @@
   z-index: 2;
 }
 
+/* ---------- Paintings-for-sale editor ---------- */
+.admin-paintings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+.admin-painting-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0.9rem;
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.admin-painting-photo { aspect-ratio: 4/5; }
+.admin-painting-add {
+  min-height: 220px;
+  justify-content: center;
+}
+.admin-painting-add .admin-photo-empty { position: relative; }
+.admin-painting-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.admin-painting-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--cream-dim);
+}
+.admin-painting-fields input,
+.admin-painting-fields select {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  color: var(--cream);
+  font-family: var(--sans);
+  font-size: 0.9rem;
+}
+.admin-hint { color: var(--gold); font-style: italic; opacity: 0.85; }
+
 /* ---------- Collaborator ---------- */
 .admin-collab-grid {
   display: grid;

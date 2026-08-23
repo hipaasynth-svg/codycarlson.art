@@ -9,11 +9,17 @@
  */
 window.SITE_CONFIG = {
 
-  // Full-screen background image. Swap this path for a real photo any time —
-  // drop the file into assets/images/ and point to it here.
+  // Full-screen background. You can now run a SLIDESHOW of up to 20 photos —
+  // add them from the admin page (/admin) under "Background Slideshow" and
+  // they cross-fade automatically. `backgroundImage` below is the single-image
+  // fallback used before any slideshow photos are added (and while the admin
+  // manifest is loading). Drop a file into assets/images/ and point to it here.
   // A quick way to preview a different image without editing this file:
   // add ?bg=https://example.com/photo.jpg to the page URL.
   backgroundImage: "assets/images/IMG_0448.jpeg",
+
+  // How long each background slideshow photo stays before cross-fading (ms).
+  backgroundSlideInterval: 6000,
 
   hero: {
     availabilityLabel: "Books Open",
@@ -75,6 +81,71 @@ window.SITE_CONFIG = {
     },
   ],
 
+  // ---- AVAILABLE NOW (finished pieces for sale, with Stripe checkout) ------
+  // Finished work a visitor can BUY right now with a card, instead of only
+  // commissioning something new. Each piece renders as a card showing its
+  // photo, size, and PRICE, with a Buy button that goes to Stripe checkout.
+  //
+  // Leave `availableWork` empty ([]) to hide the whole section.
+  //
+  // Fields for each piece:
+  //   • image  — path to a photo, e.g. "assets/images/summer-walleye.jpg".
+  //              Drop the file into assets/images/ and point to it here.
+  //              Blank shows a "Photo coming soon" placeholder tile.
+  //   • price  — the price shown next to the work, e.g. "$1,200". Blank shows
+  //              "Inquire for price". This is DISPLAY ONLY — the amount the
+  //              buyer is actually charged comes from Stripe (see below), so
+  //              keep this in sync with the Stripe price you set up.
+  //   • status — "available" (default), "reserved", or "sold". Anything other
+  //              than "available" shows a ribbon and disables the Buy button.
+  //
+  // NOTE: The paintings store is normally managed from the admin page (/admin)
+  // under "Paintings for Sale" — 18 slots, each with a photo, price, and Stripe
+  // link — so Cody can update it without editing this file. The list below is
+  // only a fallback shown when no paintings have been added in /admin yet.
+  //
+  // Hooking up Stripe — two ways, pick whichever is easier. If both are set,
+  // `buyUrl` wins. If neither is set, the button falls back to "Reserve this
+  // piece", which pre-fills the inquiry form below.
+  //
+  //   A) Payment Link (simplest — NO server setup, no secret keys):
+  //      In the Stripe Dashboard create a Payment Link for the piece, copy its
+  //      https://buy.stripe.com/... URL, and paste it as `buyUrl`.
+  //        buyUrl: "https://buy.stripe.com/xxxxxxxx"
+  //
+  //   B) On-site Checkout (keeps buyers on your domain):
+  //      In Stripe create a Product + Price for the piece, copy the Price ID
+  //      (starts with "price_"), and set it as `stripePriceId`. This uses the
+  //      /api/checkout function, which needs the STRIPE_SECRET_KEY environment
+  //      variable set on the Vercel project (same place as ADMIN_PASSWORD).
+  //        stripePriceId: "price_xxxxxxxx"
+  availableHeading: "Available Now",
+  availableIntro: "Finished, one-of-a-kind pieces ready to ship. Buy directly below, or start a custom commission.",
+  availableWork: [
+    {
+      title: "Summer Walleye",
+      medium: "Box-elder carving",
+      size: "27\"",
+      price: "",            // e.g. "$1,200"
+      image: "",            // e.g. "assets/images/summer-walleye.jpg"
+      status: "available",
+      buyUrl: "",           // Stripe Payment Link (option A)
+      stripePriceId: "",    // Stripe Price ID (option B)
+      description: "Hand-carved box-elder walleye — a signature finished piece.",
+    },
+    {
+      title: "Buffalo",
+      medium: "Acrylic on canvas",
+      size: "38\" × 24\"",
+      price: "",
+      image: "",
+      status: "available",
+      buyUrl: "",
+      stripePriceId: "",
+      description: "Original acrylic painting of a buffalo on canvas.",
+    },
+  ],
+
   // ---- COLLABORATOR --------------------------------------------------------
   // The photo, headline, and bio here are just DEFAULTS/fallbacks. Once you
   // fill them in from the admin page they are managed there.
@@ -95,12 +166,21 @@ window.SITE_CONFIG = {
     silverRings: { heading: "Silver Rings",  label: "Ring",   max: 6 },
   },
 
-  // 4–6 sponsor / affiliate badges. Each needs a name, link, and logo path.
-  // Leave `logo` empty to fall back to a text badge.
-  sponsors: [
-    { name: "Studio Supply Co.", url: "#", logo: "" },
-    { name: "Northwest Stone Guild", url: "#", logo: "" },
-    { name: "Artisan Materials", url: "#", logo: "" },
-    { name: "Gallery Collective", url: "#", logo: "" },
-  ],
+  // Paintings-for-sale store (managed from /admin → "Paintings for Sale").
+  // 18 slots, each with a photo, price, and Stripe link. `max` is the number
+  // of slots the admin page offers.
+  paintings: { heading: "Paintings for Sale", label: "Painting", max: 18 },
+
+  // Background slideshow (managed from /admin → "Background Slideshow").
+  // Up to `max` full-screen photos that cross-fade behind the site.
+  background: { heading: "Background Slideshow", label: "Background", max: 20 },
+
+  // Real sponsor / affiliate badges. Each needs a name, a real `url`, and an
+  // optional logo path (leave `logo` empty to fall back to a text badge).
+  // The whole "Proudly supported by" footer block is hidden while this is
+  // empty — add only genuine partners here. Placeholder badges with "#" links
+  // read as fake and hurt trust, so this ships empty until real ones exist.
+  // Example:
+  //   { name: "Northwest Stone Guild", url: "https://example.com", logo: "" },
+  sponsors: [],
 };

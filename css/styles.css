@@ -70,6 +70,22 @@ img { max-width: 100%; display: block; }
   z-index: -1;
 }
 
+/* Background slideshow: stacked layers inside #bg-layer that cross-fade. */
+#bg-layer.bg-slideshow { background-image: none !important; }
+.bg-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 1.4s ease-in-out;
+}
+.bg-slide.is-active { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .bg-slide { transition: none; }
+}
+
 /* ---------- Hero ---------- */
 .hero {
   min-height: 100vh;
@@ -540,6 +556,123 @@ img { max-width: 100%; display: block; }
   font-size: 1.4rem;
 }
 .pricing-rate .tier-desc { text-align: center; }
+
+/* Available Now — paintings store */
+.available-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.75rem;
+}
+.piece-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25);
+}
+.piece-media {
+  position: relative;
+  aspect-ratio: 4/5;
+  background-size: cover;
+  background-position: center;
+  cursor: zoom-in;
+}
+.piece-media.is-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  color: var(--cream-dim);
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  background: linear-gradient(160deg, rgba(200,168,105,0.14), rgba(0,0,0,0.35));
+}
+.piece-ribbon {
+  position: absolute;
+  top: 0.9rem;
+  right: -2.4rem;
+  transform: rotate(35deg);
+  background: var(--ink);
+  color: var(--gold);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.3rem 2.6rem;
+  border: 1px solid var(--gold-deep);
+}
+.piece-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.1rem 1.2rem 1.3rem;
+  flex: 1;
+}
+.piece-title {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  margin: 0;
+}
+.piece-meta {
+  color: var(--gold);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.piece-desc {
+  color: var(--cream-dim);
+  font-size: 0.9rem;
+  margin: 0.2rem 0 0;
+}
+.piece-foot {
+  margin-top: auto;
+  padding-top: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.piece-price {
+  font-family: var(--serif);
+  color: var(--gold);
+  font-size: 1.15rem;
+}
+.piece-buy { padding: 0.6rem 1.15rem; font-size: 0.9rem; }
+.piece-buy:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.25);
+  color: var(--ink-dim);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Purchase banner (post-Stripe redirect) */
+.purchase-banner {
+  position: sticky;
+  top: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  font-size: 0.95rem;
+  text-align: center;
+  color: var(--ink);
+  background: var(--gold);
+  box-shadow: var(--shadow-md);
+}
+.purchase-banner.is-cancel { background: #e6d8b8; }
+.purchase-banner-close {
+  background: none;
+  border: none;
+  color: var(--ink);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
 
 /* Collaborator */
 .collab-card {

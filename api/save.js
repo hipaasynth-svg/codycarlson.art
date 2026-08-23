@@ -24,6 +24,27 @@ export default async function handler(req, res) {
     galleries[key] = list.filter((url) => typeof url === 'string' && url.length > 0);
   }
 
+  // Background slideshow — a plain list of photo URLs (max 20).
+  const background = (Array.isArray(body.background) ? body.background : [])
+    .filter((url) => typeof url === 'string' && url.length > 0)
+    .slice(0, 20);
+
+  // Paintings for sale — each item carries its own photo, price, and Stripe
+  // link. Sanitize every field and keep only items that actually have a photo.
+  const str = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '');
+  const ALLOWED_STATUS = new Set(['available', 'reserved', 'sold']);
+  const paintings = (Array.isArray(body.paintings) ? body.paintings : [])
+    .filter((p) => p && typeof p.url === 'string' && p.url.length > 0)
+    .slice(0, 18)
+    .map((p) => ({
+      url: p.url,
+      title: str(p.title, 200),
+      price: str(p.price, 60),
+      buyUrl: str(p.buyUrl, 500),
+      stripePriceId: str(p.stripePriceId, 200),
+      status: ALLOWED_STATUS.has(p.status) ? p.status : 'available',
+    }));
+
   const collab = body.collaborator || {};
   const collaborator = {
     photo: typeof collab.photo === 'string' ? collab.photo : '',
@@ -34,7 +55,7 @@ export default async function handler(req, res) {
   const bioIn = body.bio || {};
   const bio = { photo: typeof bioIn.photo === 'string' ? bioIn.photo : '' };
 
-  const manifest = { galleries, collaborator, bio };
+  const manifest = { galleries, background, paintings, collaborator, bio };
 
   try {
     await put(MANIFEST_PATH, JSON.stringify(manifest), {

@@ -4,6 +4,8 @@
 
   const state = {
     galleries: { featured: [], studio: [], stones: [], silverRings: [] },
+    background: [],
+    paintings: [],
     collaborator: { photo: '', headline: '', bio: '' },
     bio: { photo: '' },
   };
@@ -132,6 +134,160 @@
     Object.keys(cfg.galleries).forEach(renderGallery);
   }
 
+  /* ---------------- Background slideshow editor ---------------- */
+  // Plain photo slots (no per-photo fields), same UX as a gallery but writing
+  // to state.background and capped by cfg.background.max.
+  function renderBackground() {
+    const meta = cfg.background || { max: 20, label: 'Background' };
+    const container = document.getElementById('background-grid');
+    if (!container) return;
+    container.innerHTML = '';
+
+    state.background.forEach((url, index) => {
+      const slot = document.createElement('div');
+      slot.className = 'admin-photo-slot';
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = `${meta.label} ${index + 1}`;
+      slot.appendChild(img);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'admin-photo-remove';
+      removeBtn.setAttribute('aria-label', 'Remove photo');
+      removeBtn.textContent = '×';
+      removeBtn.addEventListener('click', () => {
+        state.background.splice(index, 1);
+        renderBackground();
+      });
+      slot.appendChild(removeBtn);
+      container.appendChild(slot);
+    });
+
+    if (state.background.length < meta.max) {
+      const addSlot = document.createElement('div');
+      addSlot.className = 'admin-photo-slot';
+      const empty = document.createElement('label');
+      empty.className = 'admin-photo-empty';
+      empty.innerHTML = `<span class="plus">+</span><small>Upload Photo</small>`;
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        empty.classList.add('is-uploading');
+        empty.querySelector('small').textContent = 'Uploading…';
+        try {
+          const url = await uploadFile(file, 'background');
+          state.background.push(url);
+          renderBackground();
+        } catch (err) {
+          empty.classList.remove('is-uploading');
+          empty.querySelector('small').textContent = (err && err.message) || 'Failed — try again';
+          empty.title = (err && err.message) || '';
+        }
+      });
+      empty.appendChild(input);
+      addSlot.appendChild(empty);
+      container.appendChild(addSlot);
+    }
+  }
+
+  /* ---------------- Paintings-for-sale editor ---------------- */
+  // Each painting is { url, title, price, buyUrl, stripePriceId, status }.
+  // A slot only "counts" once it has a photo; empty slots are dropped on save.
+  function renderPaintings() {
+    const meta = cfg.paintings || { max: 18, label: 'Painting' };
+    const container = document.getElementById('paintings-editor');
+    if (!container) return;
+    container.innerHTML = '';
+
+    state.paintings.forEach((piece, index) => {
+      container.appendChild(buildPaintingCard(piece, index, meta));
+    });
+
+    if (state.paintings.length < meta.max) {
+      const addCard = document.createElement('div');
+      addCard.className = 'admin-painting-card admin-painting-add';
+      const empty = document.createElement('label');
+      empty.className = 'admin-photo-empty';
+      empty.innerHTML = `<span class="plus">+</span><small>Add Painting</small>`;
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        empty.classList.add('is-uploading');
+        empty.querySelector('small').textContent = 'Uploading…';
+        try {
+          const url = await uploadFile(file, 'paintings');
+          state.paintings.push({ url, title: '', price: '', buyUrl: '', stripePriceId: '', status: 'available' });
+          renderPaintings();
+        } catch (err) {
+          empty.classList.remove('is-uploading');
+          empty.querySelector('small').textContent = (err && err.message) || 'Failed — try again';
+          empty.title = (err && err.message) || '';
+        }
+      });
+      empty.appendChild(input);
+      addCard.appendChild(empty);
+      container.appendChild(addCard);
+    }
+  }
+
+  function buildPaintingCard(piece, index, meta) {
+    const card = document.createElement('div');
+    card.className = 'admin-painting-card';
+
+    const slot = document.createElement('div');
+    slot.className = 'admin-photo-slot admin-painting-photo';
+    const img = document.createElement('img');
+    img.src = piece.url;
+    img.alt = piece.title || `${meta.label} ${index + 1}`;
+    slot.appendChild(img);
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'admin-photo-remove';
+    removeBtn.setAttribute('aria-label', 'Remove painting');
+    removeBtn.textContent = '×';
+    removeBtn.addEventListener('click', () => {
+      state.paintings.splice(index, 1);
+      renderPaintings();
+    });
+    slot.appendChild(removeBtn);
+    card.appendChild(slot);
+
+    const fields = document.createElement('div');
+    fields.className = 'admin-painting-fields';
+    fields.innerHTML = `
+      <label>Title <input type="text" data-k="title" maxlength="200" placeholder="e.g. Summer Walleye" /></label>
+      <label>Price (shown to buyers) <input type="text" data-k="price" maxlength="60" placeholder="e.g. $1,200" /></label>
+      <label>Status
+        <select data-k="status">
+          <option value="available">Available</option>
+          <option value="reserved">Reserved</option>
+          <option value="sold">Sold</option>
+        </select>
+      </label>
+      <label>Stripe Payment Link <span class="admin-hint">(easiest — no setup)</span>
+        <input type="url" data-k="buyUrl" maxlength="500" placeholder="https://buy.stripe.com/…" />
+      </label>
+      <label>or Stripe Price ID <span class="admin-hint">(for on-site checkout)</span>
+        <input type="text" data-k="stripePriceId" maxlength="200" placeholder="price_…" />
+      </label>
+    `;
+    fields.querySelectorAll('[data-k]').forEach((input) => {
+      const key = input.dataset.k;
+      input.value = piece[key] || (key === 'status' ? 'available' : '');
+      input.addEventListener('input', () => { state.paintings[index][key] = input.value; });
+      input.addEventListener('change', () => { state.paintings[index][key] = input.value; });
+    });
+    card.appendChild(fields);
+    return card;
+  }
+
   /* ---------------- Collaborator editor ---------------- */
   function initCollabEditor() {
     document.getElementById('collab-headline-input').value = state.collaborator.headline;
@@ -244,6 +400,15 @@
       Object.keys(state.galleries).forEach((key) => {
         state.galleries[key] = Array.isArray(data.galleries?.[key]) ? data.galleries[key] : [];
       });
+      state.background = Array.isArray(data.background) ? data.background : [];
+      state.paintings = (Array.isArray(data.paintings) ? data.paintings : []).map((p) => ({
+        url: (p && p.url) || '',
+        title: (p && p.title) || '',
+        price: (p && p.price) || '',
+        buyUrl: (p && p.buyUrl) || '',
+        stripePriceId: (p && p.stripePriceId) || '',
+        status: (p && p.status) || 'available',
+      })).filter((p) => p.url);
       if (data.collaborator) {
         state.collaborator = {
           photo: data.collaborator.photo || '',
@@ -264,6 +429,8 @@
     const dashboard = document.getElementById('admin-dashboard');
     dashboard.hidden = false;
     await loadManifest();
+    renderPaintings();
+    renderBackground();
     buildGalleryEditors();
     renderBioPhoto();
     initCollabEditor();

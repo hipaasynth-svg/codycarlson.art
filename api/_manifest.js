@@ -8,6 +8,11 @@ export const MANIFEST_PATH = 'data/manifest.json';
 
 export const EMPTY_MANIFEST = {
   galleries: { featured: [], studio: [], stones: [], silverRings: [] },
+  // Full-screen background slideshow images (array of photo URLs).
+  background: [],
+  // Finished paintings for sale — array of { url, title, price, buyUrl,
+  // stripePriceId, status } objects, managed from /admin.
+  paintings: [],
   collaborator: { photo: '', headline: '', bio: '' },
   bio: { photo: '' },
 };
@@ -20,6 +25,8 @@ export async function readManifest() {
     const data = await res.json();
     return {
       galleries: { ...EMPTY_MANIFEST.galleries, ...(data.galleries || {}) },
+      background: Array.isArray(data.background) ? data.background : [],
+      paintings: Array.isArray(data.paintings) ? data.paintings : [],
       collaborator: { ...EMPTY_MANIFEST.collaborator, ...(data.collaborator || {}) },
       bio: { ...EMPTY_MANIFEST.bio, ...(data.bio || {}) },
     };

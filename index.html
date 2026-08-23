@@ -25,6 +25,12 @@
 
   <a class="skip-link" href="#intake-form">Skip to contact form</a>
 
+  <!-- Shown after returning from Stripe checkout (?purchase=success|cancel) -->
+  <div class="purchase-banner" id="purchase-banner" role="status" hidden>
+    <span id="purchase-banner-text"></span>
+    <button type="button" class="purchase-banner-close" id="purchase-banner-close" aria-label="Dismiss">&times;</button>
+  </div>
+
   <!-- ============ HERO / INTAKE ============ -->
   <header class="hero" id="top">
     <div class="hero-inner">
@@ -80,6 +86,16 @@
 
   <!-- ============ GALLERIES (populated from js/main.js) ============ -->
   <section class="rolodex-section rolodex-main" data-gallery="featured" hidden></section>
+
+  <!-- ============ AVAILABLE NOW (populated from js/main.js) ============ -->
+  <section class="content-section available-section" id="available" hidden>
+    <div class="content-card">
+      <h2 class="section-title" id="available-heading"></h2>
+      <p class="section-subtitle" id="available-intro"></p>
+      <div class="available-grid" id="available-grid"></div>
+    </div>
+  </section>
+
   <section class="rolodex-section rolodex-secondary" data-gallery="studio" hidden></section>
 
   <!-- ============ BIO ============ -->
@@ -120,7 +136,7 @@
 
   <!-- ============ FOOTER ============ -->
   <footer class="site-footer">
-    <div class="footer-sponsors">
+    <div class="footer-sponsors" id="footer-sponsors" hidden>
       <p class="footer-label">Proudly supported by</p>
       <div class="sponsor-row" id="sponsor-row"></div>
     </div>
@@ -129,9 +145,10 @@
         <a id="footer-email" href="#"></a>
         <span class="footer-divider">·</span>
         <a id="footer-phone" href="#"></a>
+        <span class="footer-divider" id="footer-instagram-divider" hidden>·</span>
+        <a id="footer-instagram" href="#" target="_blank" rel="noopener noreferrer" hidden>Instagram</a>
       </div>
       <p class="footer-copy">© <span id="footer-year"></span> Cody Carlson. All rights reserved.</p>
-      <p class="footer-admin"><a href="/admin.html">Manage photos</a></p>
     </div>
   </footer>
 
