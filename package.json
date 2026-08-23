@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Single-page artist site for Cody Carlson, with a small serverless admin for managing gallery photos.",
   "dependencies": {
-    "@vercel/blob": "^2.6.1"
+    "@vercel/blob": "^2.6.1",
+    "stripe": "^17.7.0"
   }
 }

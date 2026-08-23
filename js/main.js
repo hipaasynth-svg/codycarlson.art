@@ -2,11 +2,53 @@
   const cfg = window.SITE_CONFIG;
 
   /* ---------------- Background ---------------- */
+  // `?bg=...` forces a single image and disables the slideshow (handy for
+  // quick previews). Otherwise we start with the config fallback image, then
+  // swap in the admin-managed slideshow once the manifest loads.
+  const bgOverride = new URLSearchParams(window.location.search).get('bg');
+  let bgTimer = null;
+
+  function setBgLayer(el, url) {
+    el.style.backgroundImage = `url("${url}")`;
+  }
+
   function initBackground() {
-    const params = new URLSearchParams(window.location.search);
-    const override = params.get('bg');
-    const url = override || cfg.backgroundImage;
-    document.getElementById('bg-layer').style.backgroundImage = `url("${url}")`;
+    const layer = document.getElementById('bg-layer');
+    setBgLayer(layer, bgOverride || cfg.backgroundImage);
+  }
+
+  function startBackgroundSlideshow(images) {
+    const list = (Array.isArray(images) ? images : []).filter(Boolean);
+    if (bgOverride || list.length === 0) return; // keep the fallback image
+
+    const layer = document.getElementById('bg-layer');
+    layer.style.backgroundImage = '';
+    layer.classList.add('bg-slideshow');
+
+    // Two stacked layers we cross-fade between. Start with the first image.
+    const slides = [document.createElement('div'), document.createElement('div')];
+    slides.forEach((s) => { s.className = 'bg-slide'; layer.appendChild(s); });
+    setBgLayer(slides[0], list[0]);
+    slides[0].classList.add('is-active');
+
+    if (list.length === 1) return; // nothing to cycle through
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let index = 0;
+    let front = 0;
+    const interval = Math.max(2500, Number(cfg.backgroundSlideInterval) || 6000);
+
+    if (bgTimer) clearInterval(bgTimer);
+    bgTimer = setInterval(() => {
+      index = (index + 1) % list.length;
+      const back = 1 - front;
+      setBgLayer(slides[back], list[index]);
+      // Force reflow so the opacity transition runs from a clean state.
+      void slides[back].offsetWidth;
+      slides[back].classList.add('is-active');
+      slides[front].classList.remove('is-active');
+      front = back;
+    }, reduce ? interval * 2 : interval);
   }
 
   /* ---------------- Hero content ---------------- */
@@ -69,6 +111,172 @@
     });
   }
 
+  /* ---------------- Inquiry pre-fill ---------------- */
+  // Used by the "Reserve this piece" fallback: jump to the intake form with a
+  // message already written about the specific piece.
+  function prefillInquiry(pieceTitle) {
+    const form = document.getElementById('intake-form');
+    const message = form.querySelector('#f-message');
+    if (message) {
+      const line = `I'd like to reserve "${pieceTitle}".`;
+      message.value = message.value.includes(line) ? message.value : `${line}\n\n${message.value}`.trim();
+    }
+    document.getElementById('intake-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const nameField = form.querySelector('#f-name');
+    if (nameField) window.setTimeout(() => nameField.focus(), 400);
+  }
+
+  /* ---------------- Available Now (paintings store) ---------------- */
+  // Prefer the admin-managed list from the manifest; fall back to the example
+  // pieces in config.js when nothing has been added in /admin yet.
+  function initAvailableWork(manifest) {
+    const section = document.getElementById('available');
+    const grid = document.getElementById('available-grid');
+    if (!section || !grid) return;
+
+    const fromManifest = Array.isArray(manifest.paintings) ? manifest.paintings : [];
+    const items = fromManifest.length ? fromManifest : (cfg.availableWork || []);
+    const visible = items.filter((p) => p && (p.title || p.image || p.url));
+    if (visible.length === 0) return; // section stays hidden
+
+    document.getElementById('available-heading').textContent = cfg.availableHeading || 'Available Now';
+    const intro = document.getElementById('available-intro');
+    if (cfg.availableIntro) intro.textContent = cfg.availableIntro; else intro.hidden = true;
+
+    visible.forEach((piece) => grid.appendChild(buildPieceCard(piece)));
+    section.hidden = false;
+  }
+
+  function buildPieceCard(piece) {
+    const img = piece.image || piece.url || '';
+    const status = (piece.status || 'available').toLowerCase();
+    const soldOut = status === 'sold' || status === 'reserved';
+
+    const card = document.createElement('article');
+    card.className = 'piece-card';
+
+    const media = document.createElement('div');
+    media.className = 'piece-media';
+    if (img) {
+      media.style.backgroundImage = `url("${img}")`;
+      media.setAttribute('role', 'button');
+      media.setAttribute('tabindex', '0');
+      media.setAttribute('aria-label', `${piece.title || 'Piece'} — view larger`);
+      media.addEventListener('click', () => openLightbox(img));
+      media.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(img); }
+      });
+    } else {
+      media.classList.add('is-empty');
+      media.innerHTML = `<span>Photo coming soon</span>`;
+    }
+    if (soldOut) {
+      const ribbon = document.createElement('span');
+      ribbon.className = 'piece-ribbon';
+      ribbon.textContent = status === 'sold' ? 'Sold' : 'Reserved';
+      media.appendChild(ribbon);
+    }
+    card.appendChild(media);
+
+    const body = document.createElement('div');
+    body.className = 'piece-body';
+
+    const meta = [piece.medium, piece.size].filter(Boolean).join(' · ');
+    body.innerHTML = `
+      <h3 class="piece-title">${escapeHtml(piece.title || 'Untitled')}</h3>
+      ${meta ? `<p class="piece-meta">${escapeHtml(meta)}</p>` : ''}
+      ${piece.description ? `<p class="piece-desc">${escapeHtml(piece.description)}</p>` : ''}
+      <div class="piece-foot">
+        <span class="piece-price">${piece.price ? escapeHtml(piece.price) : 'Inquire for price'}</span>
+      </div>
+    `;
+    body.querySelector('.piece-foot').appendChild(buildBuyButton(piece, soldOut));
+    card.appendChild(body);
+    return card;
+  }
+
+  function buildBuyButton(piece, soldOut) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-primary piece-buy';
+
+    if (soldOut) {
+      btn.textContent = (piece.status || '').toLowerCase() === 'reserved' ? 'Reserved' : 'Sold';
+      btn.disabled = true;
+      return btn;
+    }
+
+    // A) Stripe Payment Link — a direct link, no backend needed.
+    if (piece.buyUrl) {
+      btn.textContent = 'Buy Now';
+      btn.addEventListener('click', () => { window.location.href = piece.buyUrl; });
+      return btn;
+    }
+
+    // B) On-site Stripe Checkout via /api/checkout (needs STRIPE_SECRET_KEY).
+    if (piece.stripePriceId) {
+      btn.textContent = 'Buy Now';
+      btn.addEventListener('click', async () => {
+        const original = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Starting checkout…';
+        try {
+          const res = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ priceId: piece.stripePriceId, title: piece.title || '', pieceId: piece.id || '' }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.url) throw new Error(data.error || 'Checkout unavailable');
+          window.location.href = data.url;
+        } catch (err) {
+          // Fall back to an inquiry so the sale isn't simply lost.
+          btn.disabled = false;
+          btn.textContent = original;
+          prefillInquiry(piece.title || 'this piece');
+        }
+      });
+      return btn;
+    }
+
+    // C) No Stripe configured — reserve via the inquiry form.
+    btn.textContent = 'Reserve this piece';
+    btn.addEventListener('click', () => prefillInquiry(piece.title || 'this piece'));
+    return btn;
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+  }
+
+  /* ---------------- Purchase banner ---------------- */
+  function initPurchaseBanner() {
+    const params = new URLSearchParams(window.location.search);
+    const purchase = params.get('purchase');
+    if (purchase !== 'success' && purchase !== 'cancel') return;
+
+    const banner = document.getElementById('purchase-banner');
+    const text = document.getElementById('purchase-banner-text');
+    if (!banner || !text) return;
+
+    if (purchase === 'success') {
+      banner.classList.add('is-success');
+      text.textContent = 'Thank you — your purchase is complete. A confirmation is on its way to your email.';
+    } else {
+      banner.classList.add('is-cancel');
+      text.textContent = 'Checkout canceled — no charge was made. The piece is still available.';
+    }
+    banner.hidden = false;
+    document.getElementById('purchase-banner-close').addEventListener('click', () => { banner.hidden = true; });
+
+    // Clean the query string so a refresh doesn't re-show the banner.
+    if (window.history.replaceState) {
+      window.history.replaceState({}, '', window.location.pathname + window.location.hash);
+    }
+  }
+
   /* ---------------- Galleries ---------------- */
   // Fetch the photo manifest saved from the admin page. If it isn't set up
   // yet (or the request fails), fall back to an empty manifest so the public
@@ -80,11 +288,13 @@
       const data = await res.json();
       return {
         galleries: (data && data.galleries) || {},
+        background: (data && data.background) || [],
+        paintings: (data && data.paintings) || [],
         collaborator: (data && data.collaborator) || null,
         bio: (data && data.bio) || null,
       };
     } catch {
-      return { galleries: {}, collaborator: null, bio: null };
+      return { galleries: {}, background: [], paintings: [], collaborator: null, bio: null };
     }
   }
 
@@ -272,23 +482,41 @@
 
   /* ---------------- Footer ---------------- */
   function initFooter() {
-    const sponsorRow = document.getElementById('sponsor-row');
-    cfg.sponsors.forEach((sponsor) => {
-      const a = document.createElement('a');
-      a.className = 'sponsor-badge';
-      a.href = sponsor.url;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      if (sponsor.logo) {
-        const img = document.createElement('img');
-        img.src = sponsor.logo;
-        img.alt = sponsor.name;
-        a.appendChild(img);
-      } else {
-        a.textContent = sponsor.name;
-      }
-      sponsorRow.appendChild(a);
-    });
+    // Only show the "Proudly supported by" block when there are real sponsors —
+    // placeholder badges read as fake and hurt trust, so an empty list hides it.
+    const sponsors = (cfg.sponsors || []).filter((s) => s && s.name && s.url && s.url !== '#');
+    const sponsorsBlock = document.getElementById('footer-sponsors');
+    if (sponsors.length === 0) {
+      if (sponsorsBlock) sponsorsBlock.hidden = true;
+    } else {
+      if (sponsorsBlock) sponsorsBlock.hidden = false;
+      const sponsorRow = document.getElementById('sponsor-row');
+      sponsors.forEach((sponsor) => {
+        const a = document.createElement('a');
+        a.className = 'sponsor-badge';
+        a.href = sponsor.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        if (sponsor.logo) {
+          const img = document.createElement('img');
+          img.src = sponsor.logo;
+          img.alt = sponsor.name;
+          a.appendChild(img);
+        } else {
+          a.textContent = sponsor.name;
+        }
+        sponsorRow.appendChild(a);
+      });
+    }
+
+    // Instagram link — shows only when a URL is set in config.
+    const instagram = (cfg.contact.instagram || '').trim();
+    if (instagram) {
+      const igLink = document.getElementById('footer-instagram');
+      const igDivider = document.getElementById('footer-instagram-divider');
+      if (igLink) { igLink.href = instagram; igLink.hidden = false; }
+      if (igDivider) igDivider.hidden = false;
+    }
 
     const footerEmail = document.getElementById('footer-email');
     footerEmail.href = `mailto:${cfg.contact.email}`;
@@ -310,9 +538,12 @@
     initBio();
     initPricing();
     initFooter();
+    initPurchaseBanner();
 
     const manifest = await loadManifest();
+    startBackgroundSlideshow(manifest.background);
     initGalleries(manifest);
+    initAvailableWork(manifest);
     initCollaborator(manifest);
     applyBioPhoto(manifest);
   });
