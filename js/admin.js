@@ -1,6 +1,7 @@
 (() => {
   const cfg = window.SITE_CONFIG;
   const PASSWORD_KEY = 'cc_admin_password';
+  const newId = () => `p_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 
   const state = {
     galleries: { featured: [], studio: [], stones: [], silverRings: [] },
@@ -223,7 +224,7 @@
         empty.querySelector('small').textContent = 'Uploading…';
         try {
           const url = await uploadFile(file, 'paintings');
-          state.paintings.push({ url, title: '', price: '', buyUrl: '', stripePriceId: '', status: 'available' });
+          state.paintings.push({ id: newId(), url, title: '', price: '', buyUrl: '', stripePriceId: '', status: 'available' });
           renderPaintings();
         } catch (err) {
           empty.classList.remove('is-uploading');
@@ -402,6 +403,7 @@
       });
       state.background = Array.isArray(data.background) ? data.background : [];
       state.paintings = (Array.isArray(data.paintings) ? data.paintings : []).map((p) => ({
+        id: (p && p.id) || newId(),
         url: (p && p.url) || '',
         title: (p && p.title) || '',
         price: (p && p.price) || '',

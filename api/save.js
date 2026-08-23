@@ -32,11 +32,14 @@ export default async function handler(req, res) {
   // Paintings for sale — each item carries its own photo, price, and Stripe
   // link. Sanitize every field and keep only items that actually have a photo.
   const str = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '');
+  const newId = () => `p_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
   const ALLOWED_STATUS = new Set(['available', 'reserved', 'sold']);
   const paintings = (Array.isArray(body.paintings) ? body.paintings : [])
     .filter((p) => p && typeof p.url === 'string' && p.url.length > 0)
     .slice(0, 18)
     .map((p) => ({
+      // Stable id so a Stripe purchase can be matched back to this piece.
+      id: (typeof p.id === 'string' && p.id) ? p.id.slice(0, 64) : newId(),
       url: p.url,
       title: str(p.title, 200),
       price: str(p.price, 60),

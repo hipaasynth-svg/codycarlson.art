@@ -30,6 +30,7 @@ export default async function handler(req, res) {
   const body = req.body || {};
   const priceId = typeof body.priceId === 'string' ? body.priceId.trim() : '';
   const title = typeof body.title === 'string' ? body.title.slice(0, 200) : '';
+  const pieceId = typeof body.pieceId === 'string' ? body.pieceId.slice(0, 64) : '';
 
   // Stripe Price IDs always look like "price_…". Reject anything else before
   // calling Stripe so bad input gets a clean 400 instead of a Stripe error.
@@ -52,7 +53,11 @@ export default async function handler(req, res) {
       shipping_address_collection: { allowed_countries: ['US', 'CA'] },
       success_url: `${origin}/?purchase=success`,
       cancel_url: `${origin}/?purchase=cancel`,
-      metadata: title ? { piece: title } : undefined,
+      // Stamp the piece so the webhook can flip exactly this piece to "sold".
+      metadata: {
+        ...(title ? { piece: title } : {}),
+        ...(pieceId ? { pieceId } : {}),
+      },
     });
     res.status(200).json({ url: session.url });
   } catch (err) {

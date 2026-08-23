@@ -34,6 +34,23 @@ and disable buying. After checkout, buyers return to `/?purchase=success` (or
 The price you type is display-only — the amount actually charged always comes
 from the Stripe Payment Link or Price, so keep the two in sync.
 
+### Auto-mark pieces Sold (webhook)
+
+`api/webhook.js` flips a piece to **Sold** automatically the moment it's
+purchased, so nothing can be double-sold. To turn it on:
+
+1. Deploy the project.
+2. In Stripe → **Developers → Webhooks**, add an endpoint at
+   `https://<your-domain>/api/webhook` listening for
+   `checkout.session.completed` (optionally also
+   `checkout.session.async_payment_succeeded`).
+3. Copy the endpoint's signing secret (`whsec_…`) into the
+   `STRIPE_WEBHOOK_SECRET` environment variable on the Vercel project.
+
+Purchases made through **on-site checkout** always match the right piece (its
+id travels in the checkout metadata). For **Payment Link** pieces, also fill in
+the piece's *Stripe Price ID* field so the webhook can match the sale to it.
+
 ## Background slideshow
 
 Add up to 20 full-screen photos under **Background Slideshow** in `/admin` and

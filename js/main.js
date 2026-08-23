@@ -224,7 +224,7 @@
           const res = await fetch('/api/checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ priceId: piece.stripePriceId, title: piece.title || '' }),
+            body: JSON.stringify({ priceId: piece.stripePriceId, title: piece.title || '', pieceId: piece.id || '' }),
           });
           const data = await res.json().catch(() => ({}));
           if (!res.ok || !data.url) throw new Error(data.error || 'Checkout unavailable');
