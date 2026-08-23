@@ -13,26 +13,23 @@ folder to Vercel so the `api/` routes run.
 ## Selling paintings (Stripe)
 
 Finished pieces for sale live in the **Paintings for Sale** section of the
-admin page (`/admin`) — up to 18 slots, each with a photo, a price shown to
-buyers, and a Stripe link. There are two ways to take payment; pick whichever
-is easier per piece:
+admin page (`/admin`) — up to 18 slots, shown on the home page as a carousel.
+For each piece you just add a **photo** and a **price** (e.g. `$1,200`):
 
-- **Payment Link (simplest, no setup):** in the Stripe Dashboard create a
-  Payment Link for the piece and paste its `https://buy.stripe.com/…` URL into
-  the painting's *Stripe Payment Link* field. Nothing else is needed.
-- **On-site checkout:** create a Product + Price in Stripe, copy the Price ID
-  (`price_…`) into the painting's *Stripe Price ID* field, and set the
-  `STRIPE_SECRET_KEY` environment variable on the Vercel project (same place as
-  `ADMIN_PASSWORD`). Buyers then check out via `/api/checkout` without leaving
-  the site.
+- The **price you type is what the buyer is charged.** Clicking **Buy Now**
+  opens Stripe checkout for that amount via `/api/checkout`, which reads the
+  price from the saved manifest server-side (the browser never sends an amount,
+  so it can't be tampered with). This needs the `STRIPE_SECRET_KEY` environment
+  variable set on the Vercel project (same place as `ADMIN_PASSWORD`).
+- No Stripe dashboard work is required. Two optional overrides live under
+  **Advanced Stripe options** per piece: a **Payment Link** (`buyUrl`, e.g.
+  `https://buy.stripe.com/…` — bypasses `/api/checkout` entirely, needs no
+  secret key) or a preset **Price ID** (`stripePriceId`, `price_…`).
 
-If a piece has neither, its button becomes **Reserve this piece**, which
-pre-fills the inquiry form. Mark a piece *Reserved* or *Sold* to show a ribbon
-and disable buying. After checkout, buyers return to `/?purchase=success` (or
-`?purchase=cancel`), which shows a confirmation banner.
-
-The price you type is display-only — the amount actually charged always comes
-from the Stripe Payment Link or Price, so keep the two in sync.
+If a piece has no price and no Stripe override, its button becomes **Reserve
+this piece**, which pre-fills the inquiry form. Set a piece to *Reserved* or
+*Sold* to show a ribbon and disable buying. After checkout, buyers return to
+`/?purchase=success` (or `?purchase=cancel`), which shows a confirmation banner.
 
 ### Auto-mark pieces Sold (webhook)
 

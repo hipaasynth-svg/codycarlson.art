@@ -129,10 +129,13 @@
   /* ---------------- Available Now (paintings store) ---------------- */
   // Prefer the admin-managed list from the manifest; fall back to the example
   // pieces in config.js when nothing has been added in /admin yet.
+  // Rendered as a rolodex-style carousel (same depth/scroll behavior as the
+  // photo galleries) so a visitor sees all the pieces at once and can click one
+  // for a larger view. Prefers the admin-managed list; falls back to config.
   function initAvailableWork(manifest) {
     const section = document.getElementById('available');
-    const grid = document.getElementById('available-grid');
-    if (!section || !grid) return;
+    const track = document.getElementById('available-track');
+    if (!section || !track) return;
 
     const fromManifest = Array.isArray(manifest.paintings) ? manifest.paintings : [];
     const items = fromManifest.length ? fromManifest : (cfg.availableWork || []);
@@ -143,20 +146,24 @@
     const intro = document.getElementById('available-intro');
     if (cfg.availableIntro) intro.textContent = cfg.availableIntro; else intro.hidden = true;
 
-    visible.forEach((piece) => grid.appendChild(buildPieceCard(piece)));
+    // With only a couple of pieces the arrows aren't needed.
+    section.querySelector('.rolodex-controls').hidden = visible.length < 3;
+
+    visible.forEach((piece) => track.appendChild(buildPieceSlide(piece)));
     section.hidden = false;
+    wireTrack(track, section);
   }
 
-  function buildPieceCard(piece) {
+  function buildPieceSlide(piece) {
     const img = piece.image || piece.url || '';
     const status = (piece.status || 'available').toLowerCase();
     const soldOut = status === 'sold' || status === 'reserved';
 
     const card = document.createElement('article');
-    card.className = 'piece-card';
+    card.className = 'rolodex-card piece-slide';
 
     const media = document.createElement('div');
-    media.className = 'piece-media';
+    media.className = 'card-media piece-slide-media';
     if (img) {
       media.style.backgroundImage = `url("${img}")`;
       media.setAttribute('role', 'button');
@@ -180,14 +187,12 @@
 
     const body = document.createElement('div');
     body.className = 'piece-body';
-
     const meta = [piece.medium, piece.size].filter(Boolean).join(' · ');
     body.innerHTML = `
       <h3 class="piece-title">${escapeHtml(piece.title || 'Untitled')}</h3>
       ${meta ? `<p class="piece-meta">${escapeHtml(meta)}</p>` : ''}
-      ${piece.description ? `<p class="piece-desc">${escapeHtml(piece.description)}</p>` : ''}
       <div class="piece-foot">
-        <span class="piece-price">${piece.price ? escapeHtml(piece.price) : 'Inquire for price'}</span>
+        <span class="piece-price">${piece.price ? escapeHtml(formatPrice(piece.price)) : 'Inquire for price'}</span>
       </div>
     `;
     body.querySelector('.piece-foot').appendChild(buildBuyButton(piece, soldOut));
@@ -213,8 +218,10 @@
       return btn;
     }
 
-    // B) On-site Stripe Checkout via /api/checkout (needs STRIPE_SECRET_KEY).
-    if (piece.stripePriceId) {
+    // B) On-site Stripe Checkout. Any admin-managed piece (has an id) that has
+    // a price or a preset Stripe price is buyable — the amount is looked up
+    // server-side from the id, so just adding a photo + price makes it work.
+    if (piece.id && (piece.price || piece.stripePriceId)) {
       btn.textContent = 'Buy Now';
       btn.addEventListener('click', async () => {
         const original = btn.textContent;
@@ -224,13 +231,14 @@
           const res = await fetch('/api/checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ priceId: piece.stripePriceId, title: piece.title || '', pieceId: piece.id || '' }),
+            body: JSON.stringify({ pieceId: piece.id }),
           });
           const data = await res.json().catch(() => ({}));
           if (!res.ok || !data.url) throw new Error(data.error || 'Checkout unavailable');
           window.location.href = data.url;
         } catch (err) {
-          // Fall back to an inquiry so the sale isn't simply lost.
+          // Fall back to an inquiry so the sale isn't simply lost (e.g. before
+          // STRIPE_SECRET_KEY is configured, checkout returns 501).
           btn.disabled = false;
           btn.textContent = original;
           prefillInquiry(piece.title || 'this piece');
@@ -239,10 +247,17 @@
       return btn;
     }
 
-    // C) No Stripe configured — reserve via the inquiry form.
+    // C) No price/Stripe yet — reserve via the inquiry form.
     btn.textContent = 'Reserve this piece';
     btn.addEventListener('click', () => prefillInquiry(piece.title || 'this piece'));
     return btn;
+  }
+
+  // Show the price with a leading "$" unless the artist already typed a
+  // currency symbol, so prices always read as dollars.
+  function formatPrice(price) {
+    const t = String(price).trim();
+    return /^[$€£]/.test(t) ? t : `$${t}`;
   }
 
   function escapeHtml(str) {

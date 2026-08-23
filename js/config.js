@@ -121,30 +121,11 @@ window.SITE_CONFIG = {
   //        stripePriceId: "price_xxxxxxxx"
   availableHeading: "Available Now",
   availableIntro: "Finished, one-of-a-kind pieces ready to ship. Buy directly below, or start a custom commission.",
-  availableWork: [
-    {
-      title: "Summer Walleye",
-      medium: "Box-elder carving",
-      size: "27\"",
-      price: "",            // e.g. "$1,200"
-      image: "",            // e.g. "assets/images/summer-walleye.jpg"
-      status: "available",
-      buyUrl: "",           // Stripe Payment Link (option A)
-      stripePriceId: "",    // Stripe Price ID (option B)
-      description: "Hand-carved box-elder walleye — a signature finished piece.",
-    },
-    {
-      title: "Buffalo",
-      medium: "Acrylic on canvas",
-      size: "38\" × 24\"",
-      price: "",
-      image: "",
-      status: "available",
-      buyUrl: "",
-      stripePriceId: "",
-      description: "Original acrylic painting of a buffalo on canvas.",
-    },
-  ],
+  // Managed from /admin → "Paintings for Sale". This stays EMPTY so the section
+  // is simply hidden until real pieces are added there — no placeholder cards
+  // ever show to visitors. (You could hard-code fallback pieces here using the
+  // fields documented above, but /admin is the normal way.)
+  availableWork: [],
 
   // ---- COLLABORATOR --------------------------------------------------------
   // The photo, headline, and bio here are just DEFAULTS/fallbacks. Once you
