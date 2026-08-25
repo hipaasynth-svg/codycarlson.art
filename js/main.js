@@ -155,6 +155,66 @@
     if (nameField) window.setTimeout(() => nameField.focus(), 400);
   }
 
+  /* ---------------- Stripe checkout ---------------- */
+  // Shared by the Buy Now button and the shareable ?buy=<pieceId> deep link.
+  // Returns true if checkout redirected (or attempted); false on soft failure.
+  async function startCheckout(pieceId, opts = {}) {
+    const { onError } = opts;
+    if (!pieceId) return false;
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pieceId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.url) throw new Error(data.error || 'Checkout unavailable');
+      window.location.href = data.url;
+      return true;
+    } catch (err) {
+      if (typeof onError === 'function') onError(err);
+      return false;
+    }
+  }
+
+  // Shareable purchase link: https://codycarlson.art/?buy=<pieceId>
+  // Opens Stripe Checkout for that piece once inventory is loaded.
+  function initBuyDeepLink(manifest) {
+    const params = new URLSearchParams(window.location.search);
+    const buyId = (params.get('buy') || '').trim();
+    if (!buyId) return;
+
+    const paintings = Array.isArray(manifest.paintings) ? manifest.paintings : [];
+    const piece = paintings.find((p) => p && p.id === buyId);
+    const status = ((piece && piece.status) || 'available').toLowerCase();
+
+    // Strip ?buy= so a refresh doesn't re-fire checkout.
+    if (window.history.replaceState) {
+      params.delete('buy');
+      const qs = params.toString();
+      const next = window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash;
+      window.history.replaceState({}, '', next);
+    }
+
+    if (!piece || status === 'sold' || status === 'reserved') {
+      const section = document.getElementById('available');
+      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    // Prefer a real Payment Link if the piece has one.
+    if (piece.buyUrl) {
+      window.location.href = piece.buyUrl;
+      return;
+    }
+
+    startCheckout(buyId, {
+      onError: () => {
+        prefillInquiry(piece.title || 'this piece');
+      },
+    });
+  }
+
   /* ---------------- Available Now (paintings store) ---------------- */
   // Prefer the admin-managed list from the manifest; fall back to the example
   // pieces in config.js when nothing has been added in /admin yet.
@@ -256,21 +316,18 @@
         const original = btn.textContent;
         btn.disabled = true;
         btn.textContent = 'Starting checkout…';
-        try {
-          const res = await fetch('/api/checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pieceId: piece.id }),
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok || !data.url) throw new Error(data.error || 'Checkout unavailable');
-          window.location.href = data.url;
-        } catch (err) {
-          // Fall back to an inquiry so the sale isn't simply lost (e.g. before
-          // STRIPE_SECRET_KEY is configured, checkout returns 501).
+        const ok = await startCheckout(piece.id, {
+          onError: () => {
+            // Fall back to an inquiry so the sale isn't simply lost (e.g. before
+            // STRIPE_SECRET_KEY is configured, checkout returns 501).
+            btn.disabled = false;
+            btn.textContent = original;
+            prefillInquiry(piece.title || 'this piece');
+          },
+        });
+        if (!ok) {
           btn.disabled = false;
           btn.textContent = original;
-          prefillInquiry(piece.title || 'this piece');
         }
       });
       return btn;
@@ -590,5 +647,7 @@
     initAvailableWork(manifest);
     initCollaborator(manifest);
     applyBioPhoto(manifest);
+    // Deep-link checkout after inventory is on the page.
+    initBuyDeepLink(manifest);
   });
 })();

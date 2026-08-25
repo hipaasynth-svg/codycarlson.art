@@ -17,8 +17,8 @@ import { readManifest } from './_manifest.js';
 // "$1,200" -> 120000 (cents). Returns null if it can't be parsed to a usable
 // amount. Stripe's minimum charge is 50 cents.
 function priceToCents(str) {
-  if (typeof str !== 'string') return null;
-  const n = parseFloat(str.replace(/[^0-9.]/g, ''));
+  if (typeof str !== 'string' && typeof str !== 'number') return null;
+  const n = parseFloat(String(str).replace(/[^0-9.]/g, ''));
   if (!isFinite(n) || n <= 0) return null;
   const cents = Math.round(n * 100);
   return cents >= 50 ? cents : null;
@@ -63,6 +63,10 @@ export default async function handler(req, res) {
     return;
   }
 
+  const imageUrl = typeof piece.url === 'string' && /^https?:\/\//i.test(piece.url)
+    ? piece.url
+    : null;
+
   // Build the line item: a preset Stripe Price wins; otherwise charge the
   // typed price. Both come from the server-side manifest, never the client.
   let lineItem = null;
@@ -74,11 +78,14 @@ export default async function handler(req, res) {
       res.status(400).json({ error: 'This piece has no valid price set.' });
       return;
     }
+    const productData = { name: piece.title || 'Original artwork' };
+    if (imageUrl) productData.images = [imageUrl];
+    if (piece.size) productData.description = `Size: ${piece.size}`;
     lineItem = {
       price_data: {
         currency: 'usd',
         unit_amount: cents,
-        product_data: { name: piece.title || 'Original artwork' },
+        product_data: productData,
       },
       quantity: 1,
     };
