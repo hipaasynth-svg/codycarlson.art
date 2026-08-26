@@ -10,8 +10,8 @@ export const EMPTY_MANIFEST = {
   galleries: { featured: [], studio: [], stones: [], silverRings: [] },
   // Full-screen background slideshow images (array of photo URLs).
   background: [],
-  // Finished paintings for sale — array of { url, title, price, buyUrl,
-  // stripePriceId, status } objects, managed from /admin.
+  // Finished paintings for sale — array of { url, title, medium, size, price,
+  // buyUrl, stripePriceId, status } objects, managed from /admin.
   paintings: [],
   collaborator: { photo: '', headline: '', bio: '' },
   bio: { photo: '' },

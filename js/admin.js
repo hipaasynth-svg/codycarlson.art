@@ -200,7 +200,7 @@
   // The typed Price is what a buyer is charged (via /api/checkout), so a photo
   // + price is all a piece needs — the Stripe fields are optional overrides.
   function blankPainting() {
-    return { id: newId(), url: '', title: '', size: '', price: '', buyUrl: '', stripePriceId: '', status: 'available' };
+    return { id: newId(), url: '', title: '', medium: '', size: '', price: '', buyUrl: '', stripePriceId: '', status: 'available' };
   }
   let paintingDraft = blankPainting();
 
@@ -228,6 +228,9 @@
     fields.className = 'admin-painting-fields';
     fields.innerHTML = `
       <label>Title <input type="text" data-k="title" maxlength="200" placeholder="e.g. Summer Walleye" /></label>
+      <label>Medium <span class="admin-hint">(optional)</span>
+        <input type="text" data-k="medium" maxlength="100" placeholder="e.g. Acrylic on canvas" />
+      </label>
       <label>Dimensions <span class="admin-hint">(optional)</span>
         <input type="text" data-k="size" maxlength="60" placeholder='e.g. 27&quot; or 38&quot; × 24&quot;' />
       </label>
@@ -453,6 +456,7 @@
         id: (p && p.id) || newId(),
         url: (p && p.url) || '',
         title: (p && p.title) || '',
+        medium: (p && p.medium) || '',
         size: (p && p.size) || '',
         price: (p && p.price) || '',
         buyUrl: (p && p.buyUrl) || '',
