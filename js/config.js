@@ -45,10 +45,11 @@ window.SITE_CONFIG = {
 
   bio: {
     photo: "", // optional path to an artist portrait, e.g. "assets/images/cody-portrait.jpg"
-    heading: "About the Work",
+    heading: "About the Artist",
     paragraphs: [
-      "Cody Carlson works across three disciplines that share a single obsession: coaxing form and color out of resistant material. Each piece begins as raw stone, wood, or canvas and is shaped slowly, by hand, until it holds light the way it was meant to.",
-      "Commissions are taken on a limited basis to keep every piece personal — from the first sketch through the final polish.",
+      "Cody Carlson is a self-taught sculptor based in Minot, North Dakota. Over nine years and more than a thousand works, he has refined a focused practice centered on wildlife, the human form, and animal companions. His sculptures emphasize clarity of form, the natural character of the wood, and a vivid sense of life, with particular attention given to the eyes and a quiet, forward-leaning whimsy that animates each piece.",
+      "Working without formal training, Carlson continues to evolve through ongoing experimentation and new lines of inquiry, allowing each phase of the work to open into the next. This restless engagement with material and idea steadily strengthens the practice, moving it toward durable presence within the cultural and regional landscape of the Northern Plains.",
+      "His sculptures range from polished outdoor-ready figures to more abstract forms, each carrying the quiet authority of long and consistent studio work. Carlson's work is available through codycarlson.art.",
     ],
   },
 
