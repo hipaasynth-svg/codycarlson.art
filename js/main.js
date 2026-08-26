@@ -292,18 +292,28 @@
     const card = document.createElement('article');
     card.className = 'rolodex-card piece-slide';
 
-    const media = document.createElement('div');
+    // A piece with a slug (from the manifest) has its own detail page; clicking
+    // its photo or title opens it. Fallback/example pieces without a slug keep
+    // the old lightbox behavior so they still enlarge.
+    const pieceUrl = piece.slug ? `/piece/${encodeURIComponent(piece.slug)}` : '';
+
+    const media = document.createElement(pieceUrl && img ? 'a' : 'div');
     media.className = 'card-media piece-slide-media';
     if (img) {
       media.appendChild(buildPhoto(img, pieceAltText(piece)));
-      media.setAttribute('role', 'button');
-      media.setAttribute('tabindex', '0');
-      media.setAttribute('aria-label', `${piece.title || 'Piece'} — view larger`);
-      const pieceAlt = pieceAltText(piece);
-      media.addEventListener('click', () => openLightbox(img, pieceAlt));
-      media.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(img, pieceAlt); }
-      });
+      if (pieceUrl) {
+        media.href = pieceUrl;
+        media.setAttribute('aria-label', `${piece.title || 'Piece'} — view details`);
+      } else {
+        const pieceAlt = pieceAltText(piece);
+        media.setAttribute('role', 'button');
+        media.setAttribute('tabindex', '0');
+        media.setAttribute('aria-label', `${piece.title || 'Piece'} — view larger`);
+        media.addEventListener('click', () => openLightbox(img, pieceAlt));
+        media.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(img, pieceAlt); }
+        });
+      }
     } else {
       media.classList.add('is-empty');
       media.innerHTML = `<span>Photo coming soon</span>`;
@@ -319,8 +329,12 @@
     const body = document.createElement('div');
     body.className = 'piece-body';
     const meta = [piece.medium, piece.size].filter(Boolean).join(' · ');
+    const titleText = escapeHtml(piece.title || 'Untitled');
+    const titleMarkup = pieceUrl
+      ? `<a class="piece-title-link" href="${pieceUrl}">${titleText}</a>`
+      : titleText;
     body.innerHTML = `
-      <h3 class="piece-title">${escapeHtml(piece.title || 'Untitled')}</h3>
+      <h3 class="piece-title">${titleMarkup}</h3>
       ${meta ? `<p class="piece-meta">${escapeHtml(meta)}</p>` : ''}
       <div class="piece-foot">
         <span class="piece-price">${piece.price ? escapeHtml(formatPrice(piece.price)) : 'Inquire for price'}</span>

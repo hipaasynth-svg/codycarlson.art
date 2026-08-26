@@ -44,6 +44,9 @@ export default async function handler(req, res) {
       title: str(p.title, 200),
       medium: str(p.medium, 100),
       size: str(p.size, 60),
+      // Short story shown on the piece's own page and used as its search
+      // description.
+      story: str(p.story, 2000),
       price: str(p.price, 60),
       buyUrl: str(p.buyUrl, 500),
       stripePriceId: str(p.stripePriceId, 200),
