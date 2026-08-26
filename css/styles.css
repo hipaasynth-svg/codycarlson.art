@@ -530,6 +530,68 @@ img { max-width: 100%; display: block; }
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.75rem;
 }
+
+/* Bookable services (Purchase a Demo / On-site Carving). Two cards, each with a
+   description, a required-deposit box, and a CTA that opens the inquiry form. */
+.offerings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.75rem;
+  margin-top: 1.75rem;
+}
+.offering-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.75rem;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: rgba(13, 12, 11, 0.35);
+}
+.offering-title {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  color: var(--gold);
+  margin: 0;
+}
+.offering-desc {
+  color: var(--cream-dim);
+  margin: 0;
+  line-height: 1.7;
+}
+.offering-deposit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.6rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--gold-soft);
+  border-radius: 10px;
+  background: var(--gold-soft);
+}
+.offering-deposit-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+}
+.offering-deposit-amount {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  color: var(--gold);
+}
+.offering-deposit-note {
+  flex-basis: 100%;
+  font-size: 0.85rem;
+  color: var(--cream-dim);
+  line-height: 1.5;
+}
+/* Push the CTA to the bottom so the two cards' buttons line up. */
+.offering-cta {
+  margin-top: auto;
+  align-self: flex-start;
+  text-decoration: none;
+}
 .pricing-category h3 {
   font-family: var(--serif);
   font-size: 1.3rem;

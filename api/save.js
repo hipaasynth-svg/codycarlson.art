@@ -47,6 +47,9 @@ export default async function handler(req, res) {
       // Short story shown on the piece's own page and used as its search
       // description.
       story: str(p.story, 2000),
+      // Custom image alt / SEO text. When set, it's used verbatim for the
+      // photo's alt text instead of the auto-generated one.
+      alt: str(p.alt, 300),
       price: str(p.price, 60),
       buyUrl: str(p.buyUrl, 500),
       stripePriceId: str(p.stripePriceId, 200),

@@ -202,7 +202,7 @@
   // so a photo + price is all a piece needs — the Stripe fields are optional
   // overrides. Sculptures and paintings share this one editor, keyed by store.
   function blankPiece() {
-    return { id: newId(), url: '', title: '', medium: '', size: '', story: '', price: '', buyUrl: '', stripePriceId: '', status: 'available' };
+    return { id: newId(), url: '', title: '', medium: '', size: '', story: '', alt: '', price: '', buyUrl: '', stripePriceId: '', status: 'available' };
   }
   const drafts = { paintings: blankPiece(), sculptures: blankPiece() };
 
@@ -238,6 +238,9 @@
       </label>
       <label>Story <span class="admin-hint">(optional — shown on the piece's own page)</span>
         <textarea data-k="story" rows="3" maxlength="2000" placeholder="A sentence or two: the wood or stone, what it depicts, what makes it one of a kind."></textarea>
+      </label>
+      <label>Image alt / SEO text <span class="admin-hint">(optional — describes the photo for search &amp; screen readers)</span>
+        <textarea data-k="alt" rows="2" maxlength="300" placeholder="e.g. Original handmade boxelder walleye wood carving, 27 inch North Dakota fish sculpture by Cody Carlson"></textarea>
       </label>
       <label>Price <span class="admin-hint">(charged at checkout)</span>
         <span class="admin-price-input">
@@ -464,6 +467,7 @@
         medium: (p && p.medium) || '',
         size: (p && p.size) || '',
         story: (p && p.story) || '',
+        alt: (p && p.alt) || '',
         price: (p && p.price) || '',
         buyUrl: (p && p.buyUrl) || '',
         stripePriceId: (p && p.stripePriceId) || '',

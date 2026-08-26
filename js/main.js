@@ -21,6 +21,10 @@
   // Descriptive alt for a for-sale piece, e.g.
   // "Great American Buffalo — acrylic on canvas, 16×24 in, by Cody Carlson".
   function pieceAltText(piece) {
+    // A custom alt/SEO line from /admin wins; otherwise build one from the
+    // title, medium, and size.
+    const custom = (piece.alt || '').trim();
+    if (custom) return custom;
     const title = (piece.title || '').trim() || 'Original artwork';
     const detail = [piece.medium, piece.size].map((s) => (s || '').trim()).filter(Boolean).join(', ');
     return detail ? `${title} — ${detail}, by Cody Carlson` : `${title}, by Cody Carlson`;
@@ -137,18 +141,21 @@
   }
 
   /* ---------------- Inquiry pre-fill ---------------- */
-  // Used by the "Reserve this piece" fallback: jump to the intake form with a
-  // message already written about the specific piece.
-  function prefillInquiry(pieceTitle) {
+  // Jump to the intake form with a message already written, then focus it.
+  // Shared by the "Reserve this piece" fallback and the demo / on-site CTAs.
+  function openInquiryWith(line) {
     const form = document.getElementById('intake-form');
     const message = form.querySelector('#f-message');
-    if (message) {
-      const line = `I'd like to reserve "${pieceTitle}".`;
+    if (message && line) {
       message.value = message.value.includes(line) ? message.value : `${line}\n\n${message.value}`.trim();
     }
     document.getElementById('intake-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
     const nameField = form.querySelector('#f-name');
     if (nameField) window.setTimeout(() => nameField.focus(), 400);
+  }
+
+  function prefillInquiry(pieceTitle) {
+    openInquiryWith(`I'd like to reserve "${pieceTitle}".`);
   }
 
   /* ---------------- Stripe checkout ---------------- */
@@ -646,6 +653,45 @@
     });
   }
 
+  /* ---------------- Bookable services (demos + on-site) ---------------- */
+  function initOfferings() {
+    const grid = document.getElementById('offerings-grid');
+    const section = document.getElementById('offerings');
+    if (!grid || !section) return;
+
+    const items = Array.isArray(cfg.offerings) ? cfg.offerings : [];
+    if (items.length === 0) { section.hidden = true; return; }
+
+    const heading = document.getElementById('offerings-heading');
+    if (heading) heading.textContent = cfg.offeringsHeading || 'Services';
+
+    // Clear first so this is idempotent alongside any server-prerendered markup.
+    grid.textContent = '';
+    items.forEach((o) => grid.appendChild(buildOfferingCard(o)));
+  }
+
+  function buildOfferingCard(o) {
+    const card = document.createElement('article');
+    card.className = 'offering-card';
+    card.innerHTML = `
+      <h3 class="offering-title">${escapeHtml(o.title || '')}</h3>
+      ${o.description ? `<p class="offering-desc">${escapeHtml(o.description)}</p>` : ''}
+      ${o.deposit ? `
+        <div class="offering-deposit">
+          <span class="offering-deposit-label">Required deposit</span>
+          <span class="offering-deposit-amount">${escapeHtml(o.deposit)}</span>
+          ${o.depositNote ? `<span class="offering-deposit-note">${escapeHtml(o.depositNote)}</span>` : ''}
+        </div>` : ''}
+    `;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-primary offering-cta';
+    btn.textContent = o.cta || 'Start an inquiry';
+    btn.addEventListener('click', () => openInquiryWith(o.inquiry || `I'm interested in ${o.title}.`));
+    card.appendChild(btn);
+    return card;
+  }
+
   /* ---------------- Footer ---------------- */
   function initFooter() {
     // Only show the "Proudly supported by" block when there are real sponsors —
@@ -703,6 +749,7 @@
     initLightbox();
     initBio();
     initPricing();
+    initOfferings();
     initFooter();
     initPurchaseBanner();
 

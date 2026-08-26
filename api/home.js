@@ -68,6 +68,22 @@ function renderPricingGrid(pricing) {
   }).join('');
 }
 
+function renderOfferingsGrid(offerings) {
+  if (!Array.isArray(offerings)) return '';
+  return offerings.map((o) => `
+        <article class="offering-card">
+          <h3 class="offering-title">${escapeHtml(o.title || '')}</h3>
+          ${o.description ? `<p class="offering-desc">${escapeHtml(o.description)}</p>` : ''}
+          ${o.deposit ? `
+          <div class="offering-deposit">
+            <span class="offering-deposit-label">Required deposit</span>
+            <span class="offering-deposit-amount">${escapeHtml(o.deposit)}</span>
+            ${o.depositNote ? `<span class="offering-deposit-note">${escapeHtml(o.depositNote)}</span>` : ''}
+          </div>` : ''}
+          <a class="btn btn-primary offering-cta" href="#intake-form">${escapeHtml(o.cta || 'Start an inquiry')}</a>
+        </article>`).join('');
+}
+
 function prerender(html, cfg) {
   const hero = cfg.hero || {};
   const bio = cfg.bio || {};
@@ -90,6 +106,9 @@ function prerender(html, cfg) {
   // Pricing
   out = fillEmpty(out, 'pricing-note', escapeHtml(cfg.pricingNote || ''));
   out = fillEmpty(out, 'pricing-grid', renderPricingGrid(cfg.pricing));
+  // Bookable services (demos + on-site carving)
+  out = fillEmpty(out, 'offerings-heading', escapeHtml(cfg.offeringsHeading || ''));
+  out = fillEmpty(out, 'offerings-grid', renderOfferingsGrid(cfg.offerings));
   // Real contact links (were href="#", filled by JS) so they work without JS.
   out = setHref(out, 'call-btn', telHref);
   out = setHref(out, 'email-btn', mailHref);
