@@ -82,6 +82,41 @@ window.SITE_CONFIG = {
     },
   ],
 
+  // ---- BOOKABLE SERVICES (demos + on-site carving) -------------------------
+  // Two offerings shown in their own section: each has a description, a required
+  // deposit (shown as text), and a call-to-action that opens the inquiry form
+  // pre-filled. Edit the copy and the `deposit` amounts here.
+  //   • title       — the offering's name.
+  //   • description — the paragraph shown in the card (the "description box").
+  //   • deposit     — the required deposit amount, e.g. "$100".
+  //   • depositNote — a short line under the deposit (what it covers).
+  //   • cta         — the button label.
+  //   • inquiry     — the message pre-written into the contact form when the
+  //                   button is clicked.
+  offeringsHeading: "Demonstrations & On-site Carving",
+  offerings: [
+    {
+      id: "demo",
+      title: "Purchase a Demo",
+      // PLACEHOLDER — replace with Cody's wording.
+      description: "Watch a piece come to life from the first cut. Book a live carving demonstration — in person or streamed — and take home the finished work at the end.",
+      deposit: "$100", // PLACEHOLDER amount — set the real deposit.
+      depositNote: "Required to reserve your date. Applied toward your final total.",
+      cta: "Book a Demo",
+      inquiry: "I'd like to book a carving demo.",
+    },
+    {
+      id: "onsite",
+      title: "On-site Carving",
+      // PLACEHOLDER — replace with Cody's wording.
+      description: "Have Cody carve on location — at your event, gallery, business, or gathering. Scope, scale, and subject are tailored to the occasion.",
+      deposit: "$250", // PLACEHOLDER amount — set the real deposit.
+      depositNote: "Required to book your date. Applied toward your final total.",
+      cta: "Request On-site Carving",
+      inquiry: "I'm interested in on-site carving.",
+    },
+  ],
+
   // ---- AVAILABLE NOW (finished pieces for sale, with Stripe checkout) ------
   // Finished work a visitor can BUY right now with a card, instead of only
   // commissioning something new. Each piece renders as a card showing its
