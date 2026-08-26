@@ -46,10 +46,12 @@ export default async function handler(req, res) {
   }
 
   // Look the piece up in the saved manifest — the trusted source of its price.
+  // Both for-sale stores (sculptures + paintings) share one id space.
   let piece = null;
   try {
     const manifest = await readManifest();
-    piece = (manifest.paintings || []).find((p) => p && p.id === pieceId) || null;
+    const inventory = [...(manifest.sculptures || []), ...(manifest.paintings || [])];
+    piece = inventory.find((p) => p && p.id === pieceId) || null;
   } catch {
     res.status(500).json({ error: 'Could not load inventory.' });
     return;

@@ -180,8 +180,12 @@
     const buyId = (params.get('buy') || '').trim();
     if (!buyId) return;
 
-    const paintings = Array.isArray(manifest.paintings) ? manifest.paintings : [];
-    const piece = paintings.find((p) => p && p.id === buyId);
+    // Search both stores so a shared ?buy=<id> link works for any piece.
+    const inventory = [
+      ...(Array.isArray(manifest.sculptures) ? manifest.sculptures : []),
+      ...(Array.isArray(manifest.paintings) ? manifest.paintings : []),
+    ];
+    const piece = inventory.find((p) => p && p.id === buyId);
     const status = ((piece && piece.status) || 'available').toLowerCase();
 
     // Strip ?buy= so a refresh doesn't re-fire checkout.
@@ -211,25 +215,24 @@
     });
   }
 
-  /* ---------------- Available Now (paintings store) ---------------- */
-  // Prefer the admin-managed list from the manifest; fall back to the example
-  // pieces in config.js when nothing has been added in /admin yet.
-  // Rendered as a rolodex-style carousel (same depth/scroll behavior as the
-  // photo galleries) so a visitor sees all the pieces at once and can click one
-  // for a larger view. Prefers the admin-managed list; falls back to config.
-  function initAvailableWork(manifest) {
-    const section = document.getElementById('available');
-    const track = document.getElementById('available-track');
+  /* ---------------- For-sale stores (sculptures + paintings) ---------------- */
+  // Both stores render as the same rolodex-style carousel of buyable pieces
+  // (same depth/scroll behavior as the photo galleries) so a visitor sees all
+  // the pieces at once and can click one for a larger view, with a Buy button.
+  // A store with no pieces stays hidden — no placeholder cards ever show.
+  function initStoreCarousel({ sectionId, trackId, headingId, introId, items, heading, intro }) {
+    const section = document.getElementById(sectionId);
+    const track = document.getElementById(trackId);
     if (!section || !track) return;
 
-    const fromManifest = Array.isArray(manifest.paintings) ? manifest.paintings : [];
-    const items = fromManifest.length ? fromManifest : (cfg.availableWork || []);
-    const visible = items.filter((p) => p && (p.title || p.image || p.url));
+    const visible = (items || []).filter((p) => p && (p.title || p.image || p.url));
     if (visible.length === 0) return; // section stays hidden
 
-    document.getElementById('available-heading').textContent = cfg.availableHeading || 'Available Now';
-    const intro = document.getElementById('available-intro');
-    if (cfg.availableIntro) intro.textContent = cfg.availableIntro; else intro.hidden = true;
+    document.getElementById(headingId).textContent = heading;
+    const introEl = document.getElementById(introId);
+    if (introEl) {
+      if (intro) introEl.textContent = intro; else introEl.hidden = true;
+    }
 
     // With only a couple of pieces the arrows aren't needed.
     section.querySelector('.rolodex-controls').hidden = visible.length < 3;
@@ -237,6 +240,36 @@
     visible.forEach((piece) => track.appendChild(buildPieceSlide(piece)));
     section.hidden = false;
     wireTrack(track, section);
+  }
+
+  // Paintings store — prefers the admin-managed list from the manifest; falls
+  // back to the example pieces in config.js when nothing has been added yet.
+  function initAvailableWork(manifest) {
+    const fromManifest = Array.isArray(manifest.paintings) ? manifest.paintings : [];
+    const items = fromManifest.length ? fromManifest : (cfg.availableWork || []);
+    initStoreCarousel({
+      sectionId: 'available',
+      trackId: 'available-track',
+      headingId: 'available-heading',
+      introId: 'available-intro',
+      items,
+      heading: cfg.availableHeading || 'Available Now',
+      intro: cfg.availableIntro,
+    });
+  }
+
+  // Sculptures store — same card + checkout behavior as paintings, managed from
+  // /admin. Stays hidden until real sculptures are added there.
+  function initSculptures(manifest) {
+    initStoreCarousel({
+      sectionId: 'sculptures',
+      trackId: 'sculptures-track',
+      headingId: 'sculptures-heading',
+      introId: 'sculptures-intro',
+      items: Array.isArray(manifest.sculptures) ? manifest.sculptures : [],
+      heading: cfg.sculptureHeading || 'Sculptures',
+      intro: cfg.sculptureIntro,
+    });
   }
 
   function buildPieceSlide(piece) {
@@ -388,11 +421,12 @@
         galleries: (data && data.galleries) || {},
         background: (data && data.background) || [],
         paintings: (data && data.paintings) || [],
+        sculptures: (data && data.sculptures) || [],
         collaborator: (data && data.collaborator) || null,
         bio: (data && data.bio) || null,
       };
     } catch {
-      return { galleries: {}, background: [], paintings: [], collaborator: null, bio: null };
+      return { galleries: {}, background: [], paintings: [], sculptures: [], collaborator: null, bio: null };
     }
   }
 
@@ -643,6 +677,7 @@
 
     const manifest = await loadManifest();
     startBackgroundSlideshow(manifest.background);
+    initSculptures(manifest);
     initGalleries(manifest);
     initAvailableWork(manifest);
     initCollaborator(manifest);

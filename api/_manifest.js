@@ -13,6 +13,9 @@ export const EMPTY_MANIFEST = {
   // Finished paintings for sale — array of { url, title, medium, size, price,
   // buyUrl, stripePriceId, status } objects, managed from /admin.
   paintings: [],
+  // Finished sculptures for sale — same object shape as paintings, managed
+  // from /admin. Shown as its own carousel at the top of the page.
+  sculptures: [],
   collaborator: { photo: '', headline: '', bio: '' },
   bio: { photo: '' },
 };
@@ -27,6 +30,7 @@ export async function readManifest() {
       galleries: { ...EMPTY_MANIFEST.galleries, ...(data.galleries || {}) },
       background: Array.isArray(data.background) ? data.background : [],
       paintings: Array.isArray(data.paintings) ? data.paintings : [],
+      sculptures: Array.isArray(data.sculptures) ? data.sculptures : [],
       collaborator: { ...EMPTY_MANIFEST.collaborator, ...(data.collaborator || {}) },
       bio: { ...EMPTY_MANIFEST.bio, ...(data.bio || {}) },
     };

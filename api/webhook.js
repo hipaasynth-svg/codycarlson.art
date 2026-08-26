@@ -61,7 +61,7 @@ async function markPieceSold(stripe, session) {
 
   const manifest = await readManifest();
   let changed = false;
-  manifest.paintings = (manifest.paintings || []).map((p) => {
+  const markSold = (list) => (list || []).map((p) => {
     const match = (pieceId && p.id && p.id === pieceId)
       || (p.stripePriceId && priceIds.includes(p.stripePriceId));
     if (match && p.status !== 'sold') {
@@ -70,6 +70,10 @@ async function markPieceSold(stripe, session) {
     }
     return p;
   });
+
+  // Both for-sale stores share one id space, so check each.
+  manifest.paintings = markSold(manifest.paintings);
+  manifest.sculptures = markSold(manifest.sculptures);
 
   if (changed) await writeManifest(manifest);
   return changed;

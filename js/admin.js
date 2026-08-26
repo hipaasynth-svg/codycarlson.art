@@ -7,6 +7,7 @@
     galleries: { featured: [], studio: [], stones: [], silverRings: [] },
     background: [],
     paintings: [],
+    sculptures: [],
     collaborator: { photo: '', headline: '', bio: '' },
     bio: { photo: '' },
   };
@@ -195,35 +196,36 @@
     }
   }
 
-  /* ---------------- Paintings-for-sale editor ---------------- */
-  // Each painting is { id, url, title, price, buyUrl, stripePriceId, status }.
-  // The typed Price is what a buyer is charged (via /api/checkout), so a photo
-  // + price is all a piece needs — the Stripe fields are optional overrides.
-  function blankPainting() {
+  /* ---------------- For-sale store editors (sculptures + paintings) -------- */
+  // Each piece is { id, url, title, medium, size, price, buyUrl, stripePriceId,
+  // status }. The typed Price is what a buyer is charged (via /api/checkout),
+  // so a photo + price is all a piece needs — the Stripe fields are optional
+  // overrides. Sculptures and paintings share this one editor, keyed by store.
+  function blankPiece() {
     return { id: newId(), url: '', title: '', medium: '', size: '', price: '', buyUrl: '', stripePriceId: '', status: 'available' };
   }
-  let paintingDraft = blankPainting();
+  const drafts = { paintings: blankPiece(), sculptures: blankPiece() };
 
-  function renderPaintings() {
-    const meta = cfg.paintings || { max: 18, label: 'Painting' };
-    const container = document.getElementById('paintings-editor');
+  function renderStore(storeKey) {
+    const meta = cfg[storeKey] || { max: 18, label: 'Piece' };
+    const container = document.getElementById(`${storeKey}-editor`);
     if (!container) return;
     container.innerHTML = '';
 
-    state.paintings.forEach((piece, index) => {
-      container.appendChild(buildPaintingCard(piece, index, meta));
+    state[storeKey].forEach((piece, index) => {
+      container.appendChild(buildStoreCard(storeKey, piece, index, meta));
     });
 
     // Always show one "add a piece" card with its fields visible, so it's
     // obvious where the work and its price go.
-    if (state.paintings.length < meta.max) {
-      container.appendChild(buildDraftCard());
+    if (state[storeKey].length < meta.max) {
+      container.appendChild(buildStoreDraftCard(storeKey, meta));
     }
   }
 
   // Builds the editable fields, writing every change straight onto `target`
   // (a saved piece object, or the not-yet-added draft).
-  function paintingFields(target) {
+  function pieceFields(target) {
     const fields = document.createElement('div');
     fields.className = 'admin-painting-fields';
     fields.innerHTML = `
@@ -272,7 +274,7 @@
     return fields;
   }
 
-  function buildPaintingCard(piece, index, meta) {
+  function buildStoreCard(storeKey, piece, index, meta) {
     const card = document.createElement('div');
     card.className = 'admin-painting-card';
 
@@ -285,22 +287,22 @@
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
     removeBtn.className = 'admin-photo-remove';
-    removeBtn.setAttribute('aria-label', 'Remove painting');
+    removeBtn.setAttribute('aria-label', `Remove ${(meta.label || 'piece').toLowerCase()}`);
     removeBtn.textContent = '×';
     removeBtn.addEventListener('click', () => {
-      state.paintings.splice(index, 1);
-      renderPaintings();
+      state[storeKey].splice(index, 1);
+      renderStore(storeKey);
     });
     slot.appendChild(removeBtn);
     card.appendChild(slot);
 
-    card.appendChild(paintingFields(piece));
+    card.appendChild(pieceFields(piece));
     return card;
   }
 
   // The trailing "add a piece" card: fields are always visible so the price
   // spot is obvious; uploading a photo commits the draft as a real piece.
-  function buildDraftCard() {
+  function buildStoreDraftCard(storeKey, meta) {
     const card = document.createElement('div');
     card.className = 'admin-painting-card admin-painting-draft';
 
@@ -318,11 +320,11 @@
       empty.classList.add('is-uploading');
       empty.querySelector('small').textContent = 'Uploading…';
       try {
-        const url = await uploadFile(file, 'paintings');
-        paintingDraft.url = url;
-        state.paintings.push({ ...paintingDraft });
-        paintingDraft = blankPainting();
-        renderPaintings();
+        const url = await uploadFile(file, storeKey);
+        drafts[storeKey].url = url;
+        state[storeKey].push({ ...drafts[storeKey] });
+        drafts[storeKey] = blankPiece();
+        renderStore(storeKey);
       } catch (err) {
         empty.classList.remove('is-uploading');
         empty.querySelector('small').textContent = (err && err.message) || 'Failed — try again';
@@ -333,7 +335,7 @@
     slot.appendChild(empty);
     card.appendChild(slot);
 
-    card.appendChild(paintingFields(paintingDraft));
+    card.appendChild(pieceFields(drafts[storeKey]));
     return card;
   }
 
@@ -452,7 +454,7 @@
         state.galleries[key] = Array.isArray(data.galleries?.[key]) ? data.galleries[key] : [];
       });
       state.background = Array.isArray(data.background) ? data.background : [];
-      state.paintings = (Array.isArray(data.paintings) ? data.paintings : []).map((p) => ({
+      const loadPieces = (list) => (Array.isArray(list) ? list : []).map((p) => ({
         id: (p && p.id) || newId(),
         url: (p && p.url) || '',
         title: (p && p.title) || '',
@@ -463,6 +465,8 @@
         stripePriceId: (p && p.stripePriceId) || '',
         status: (p && p.status) || 'available',
       })).filter((p) => p.url);
+      state.paintings = loadPieces(data.paintings);
+      state.sculptures = loadPieces(data.sculptures);
       if (data.collaborator) {
         state.collaborator = {
           photo: data.collaborator.photo || '',
@@ -483,7 +487,8 @@
     const dashboard = document.getElementById('admin-dashboard');
     dashboard.hidden = false;
     await loadManifest();
-    renderPaintings();
+    renderStore('sculptures');
+    renderStore('paintings');
     renderBackground();
     buildGalleryEditors();
     renderBioPhoto();

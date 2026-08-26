@@ -122,6 +122,13 @@ window.SITE_CONFIG = {
   //        stripePriceId: "price_xxxxxxxx"
   availableHeading: "Available Now",
   availableIntro: "Finished, one-of-a-kind pieces ready to ship. Buy directly below, or start a custom commission.",
+
+  // ---- SCULPTURES (finished pieces for sale, with Stripe checkout) ---------
+  // Same card + checkout behavior as the paintings store above, shown as its
+  // own carousel at the TOP of the page. Managed from /admin → "Sculptures"
+  // (8 slots), so this section stays hidden until real pieces are added there.
+  sculptureHeading: "Sculptures",
+  sculptureIntro: "Hand-carved, one-of-a-kind sculptures ready to ship. Buy directly below, or start a custom commission.",
   // Managed from /admin → "Paintings for Sale". This stays EMPTY so the section
   // is simply hidden until real pieces are added there — no placeholder cards
   // ever show to visitors. (You could hard-code fallback pieces here using the
@@ -152,6 +159,11 @@ window.SITE_CONFIG = {
   // 18 slots, each with a photo, price, and Stripe link. `max` is the number
   // of slots the admin page offers.
   paintings: { heading: "Paintings for Sale", label: "Painting", max: 18 },
+
+  // Sculptures-for-sale store (managed from /admin → "Sculptures"). 8 slots,
+  // each with a photo, price, and Stripe link. `max` is the number of slots the
+  // admin page offers.
+  sculptures: { heading: "Sculptures", label: "Sculpture", max: 8 },
 
   // Background slideshow (managed from /admin → "Background Slideshow").
   // Up to `max` full-screen photos that cross-fade behind the site.

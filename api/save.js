@@ -28,14 +28,15 @@ export default async function handler(req, res) {
     .filter((url) => typeof url === 'string' && url.length > 0)
     .slice(0, 20);
 
-  // Paintings for sale — each item carries its own photo, price, and Stripe
-  // link. Sanitize every field and keep only items that actually have a photo.
+  // For-sale stores — each item carries its own photo, price, and Stripe link.
+  // Sanitize every field and keep only items that actually have a photo. The
+  // sculptures and paintings stores share the exact same object shape.
   const str = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '');
   const newId = () => `p_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
   const ALLOWED_STATUS = new Set(['available', 'reserved', 'sold']);
-  const paintings = (Array.isArray(body.paintings) ? body.paintings : [])
+  const sanitizePieces = (list, max) => (Array.isArray(list) ? list : [])
     .filter((p) => p && typeof p.url === 'string' && p.url.length > 0)
-    .slice(0, 18)
+    .slice(0, max)
     .map((p) => ({
       // Stable id so a Stripe purchase can be matched back to this piece.
       id: (typeof p.id === 'string' && p.id) ? p.id.slice(0, 64) : newId(),
@@ -49,6 +50,9 @@ export default async function handler(req, res) {
       status: ALLOWED_STATUS.has(p.status) ? p.status : 'available',
     }));
 
+  const paintings = sanitizePieces(body.paintings, 18);
+  const sculptures = sanitizePieces(body.sculptures, 8);
+
   const collab = body.collaborator || {};
   const collaborator = {
     photo: typeof collab.photo === 'string' ? collab.photo : '',
@@ -59,7 +63,7 @@ export default async function handler(req, res) {
   const bioIn = body.bio || {};
   const bio = { photo: typeof bioIn.photo === 'string' ? bioIn.photo : '' };
 
-  const manifest = { galleries, background, paintings, collaborator, bio };
+  const manifest = { galleries, background, paintings, sculptures, collaborator, bio };
 
   try {
     await writeManifest(manifest);
