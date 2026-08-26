@@ -1,5 +1,12 @@
 {
+  "functions": {
+    "api/home.js": {
+      "includeFiles": "{index.html,js/config.js}"
+    }
+  },
   "rewrites": [
+    { "source": "/", "destination": "/api/home" },
+    { "source": "/index.html", "destination": "/api/home" },
     { "source": "/piece/:slug", "destination": "/api/piece?slug=:slug" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" }
   ]

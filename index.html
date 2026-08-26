@@ -86,23 +86,13 @@
 </head>
 <body>
 
-  <!-- Crawlable text fallback. The page's real content (bio, pricing, work) is
-       rendered by js/main.js from js/config.js and the photo manifest, so a
-       crawler or AI engine that doesn't run JavaScript would otherwise see an
-       empty page. This gives them the core, indexable facts. Shown only when
-       scripts are disabled, so it never duplicates content for normal visitors. -->
+  <!-- No-JS contact fallback. The hero, bio, and pricing text are prerendered
+       into the HTML by api/home.js (so they're indexable and visible without
+       JavaScript); this only adds working contact links, since the Call/Email
+       buttons get their real hrefs from the client script. -->
   <noscript>
-    <div style="max-width:680px;margin:2rem auto;padding:0 1.25rem;color:#e9e2d4;font-family:Georgia,serif;">
-      <h1>Cody Carlson — Sculptor, Painter &amp; Lapidary Artist</h1>
-      <p>Based in Minot, North Dakota. Books currently open for custom commissions.</p>
-      <p>Cody Carlson is a self-taught sculptor, painter, and lapidary artist. Over
-        nine years and more than a thousand works, he has built a focused practice
-        centered on wildlife, the human form, and animal companions — rendered in
-        wood, paint, and stone with particular attention to the eyes and a quiet,
-        forward-leaning whimsy that animates each piece.</p>
-      <p>Finished pieces are available to buy, and custom commissions in carving,
-        painting, and lapidary are open.</p>
-      <p>Contact: <a href="mailto:cody@codycarlson.art">cody@codycarlson.art</a>
+    <div style="max-width:680px;margin:1.5rem auto;padding:0 1.25rem;color:#e9e2d4;font-family:Georgia,serif;text-align:center;">
+      <p>Contact Cody: <a href="mailto:cody@codycarlson.art">cody@codycarlson.art</a>
         &middot; <a href="tel:+17013895644">(701) 389-5644</a></p>
     </div>
   </noscript>
