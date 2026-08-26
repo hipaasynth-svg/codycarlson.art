@@ -21,6 +21,10 @@
   // Descriptive alt for a for-sale piece, e.g.
   // "Great American Buffalo — acrylic on canvas, 16×24 in, by Cody Carlson".
   function pieceAltText(piece) {
+    // A custom alt/SEO line from /admin wins; otherwise build one from the
+    // title, medium, and size.
+    const custom = (piece.alt || '').trim();
+    if (custom) return custom;
     const title = (piece.title || '').trim() || 'Original artwork';
     const detail = [piece.medium, piece.size].map((s) => (s || '').trim()).filter(Boolean).join(', ');
     return detail ? `${title} — ${detail}, by Cody Carlson` : `${title}, by Cody Carlson`;

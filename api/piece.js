@@ -48,6 +48,8 @@ export function renderPiece(piece) {
   const img = piece.url;
 
   const metaBits = [medium, size].filter(Boolean).join(', ');
+  // Custom alt/SEO line from /admin wins for the image alt; else auto-build it.
+  const imgAlt = (piece.alt || '').trim() || altText(title, metaBits);
   // Description used for <meta>, Open Graph, and the search snippet.
   const description = truncate(
     story || [title, metaBits, priceText && `${priceText}`].filter(Boolean).join(' — ')
@@ -108,7 +110,7 @@ export function renderPiece(piece) {
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:url" content="${escapeHtml(url)}" />
   <meta property="og:image" content="${escapeHtml(img)}" />
-  <meta property="og:image:alt" content="${escapeHtml(altText(title, metaBits))}" />
+  <meta property="og:image:alt" content="${escapeHtml(imgAlt)}" />
   ${priceNum ? `<meta property="product:price:amount" content="${priceNum}" />
   <meta property="product:price:currency" content="USD" />
   <meta property="product:availability" content="${buyable ? 'in stock' : 'out of stock'}" />` : ''}
@@ -139,7 +141,7 @@ export function renderPiece(piece) {
   <main class="pd-main">
     <article class="pd-card">
       <div class="pd-media">
-        <img src="${escapeHtml(img)}" alt="${escapeHtml(altText(title, metaBits))}" />
+        <img src="${escapeHtml(img)}" alt="${escapeHtml(imgAlt)}" />
         ${buyable ? '' : `<span class="pd-ribbon">${status === 'sold' ? 'Sold' : 'Reserved'}</span>`}
       </div>
       <div class="pd-info">
