@@ -587,13 +587,13 @@ img { max-width: 100%; display: block; }
   justify-content: center;
   gap: 0.4rem;
   text-align: center;
-  color: var(--cream-dim);
+  color: var(--cream);
   font-size: 0.85rem;
   line-height: 1.5;
   max-width: 620px;
   margin: 0 auto;
   padding: 0 1.75rem;
-  opacity: 0.85;
+  opacity: 0.92;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
 }
 .store-trust::before {
