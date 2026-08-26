@@ -586,6 +586,9 @@
   function initBio() {
     document.getElementById('bio-heading').textContent = cfg.bio.heading;
     const container = document.getElementById('bio-paragraphs');
+    // Clear first so this is idempotent: the server may have prerendered these
+    // paragraphs into the HTML (for crawlers), and we re-fill from config here.
+    container.textContent = '';
     cfg.bio.paragraphs.forEach((text) => {
       const p = document.createElement('p');
       p.textContent = text;
@@ -606,6 +609,8 @@
     if (cfg.pricingNote) note.textContent = cfg.pricingNote;
 
     const grid = document.getElementById('pricing-grid');
+    // Clear first so this is idempotent alongside any server-prerendered markup.
+    grid.textContent = '';
     cfg.pricing.forEach((category) => {
       const col = document.createElement('div');
       col.className = 'pricing-category';
