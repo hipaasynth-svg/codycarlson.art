@@ -202,7 +202,7 @@
   // so a photo + price is all a piece needs — the Stripe fields are optional
   // overrides. Sculptures and paintings share this one editor, keyed by store.
   function blankPiece() {
-    return { id: newId(), url: '', title: '', medium: '', size: '', price: '', buyUrl: '', stripePriceId: '', status: 'available' };
+    return { id: newId(), url: '', title: '', medium: '', size: '', story: '', price: '', buyUrl: '', stripePriceId: '', status: 'available' };
   }
   const drafts = { paintings: blankPiece(), sculptures: blankPiece() };
 
@@ -235,6 +235,9 @@
       </label>
       <label>Dimensions <span class="admin-hint">(optional)</span>
         <input type="text" data-k="size" maxlength="60" placeholder='e.g. 27&quot; or 38&quot; × 24&quot;' />
+      </label>
+      <label>Story <span class="admin-hint">(optional — shown on the piece's own page)</span>
+        <textarea data-k="story" rows="3" maxlength="2000" placeholder="A sentence or two: the wood or stone, what it depicts, what makes it one of a kind."></textarea>
       </label>
       <label>Price <span class="admin-hint">(charged at checkout)</span>
         <span class="admin-price-input">
@@ -460,6 +463,7 @@
         title: (p && p.title) || '',
         medium: (p && p.medium) || '',
         size: (p && p.size) || '',
+        story: (p && p.story) || '',
         price: (p && p.price) || '',
         buyUrl: (p && p.buyUrl) || '',
         stripePriceId: (p && p.stripePriceId) || '',
