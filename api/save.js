@@ -1,9 +1,8 @@
 // The admin page's Save button hits this route with the full desired state
 // (which photo URLs are in which gallery, plus the collaborator content).
 // It overwrites the single manifest.json blob the public site reads from.
-import { put } from '@vercel/blob';
 import { isAuthorized } from './_auth.js';
-import { MANIFEST_PATH, EMPTY_MANIFEST } from './_manifest.js';
+import { EMPTY_MANIFEST, writeManifest } from './_manifest.js';
 
 const GALLERY_KEYS = Object.keys(EMPTY_MANIFEST.galleries);
 
@@ -42,6 +41,7 @@ export default async function handler(req, res) {
       id: (typeof p.id === 'string' && p.id) ? p.id.slice(0, 64) : newId(),
       url: p.url,
       title: str(p.title, 200),
+      medium: str(p.medium, 100),
       size: str(p.size, 60),
       price: str(p.price, 60),
       buyUrl: str(p.buyUrl, 500),
@@ -62,12 +62,7 @@ export default async function handler(req, res) {
   const manifest = { galleries, background, paintings, collaborator, bio };
 
   try {
-    await put(MANIFEST_PATH, JSON.stringify(manifest), {
-      access: 'public',
-      contentType: 'application/json',
-      addRandomSuffix: false,
-      allowOverwrite: true,
-    });
+    await writeManifest(manifest);
     res.status(200).json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: 'Save failed', detail: String(err && err.message || err) });

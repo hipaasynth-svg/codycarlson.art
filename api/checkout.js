@@ -80,7 +80,11 @@ export default async function handler(req, res) {
     }
     const productData = { name: piece.title || 'Original artwork' };
     if (imageUrl) productData.images = [imageUrl];
-    if (piece.size) productData.description = `Size: ${piece.size}`;
+    // Give the buyer context on the checkout page: medium and/or dimensions.
+    const description = [piece.medium, piece.size && `Size: ${piece.size}`]
+      .filter(Boolean)
+      .join(' · ');
+    if (description) productData.description = description;
     lineItem = {
       price_data: {
         currency: 'usd',

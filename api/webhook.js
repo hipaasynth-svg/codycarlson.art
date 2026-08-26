@@ -24,10 +24,21 @@ import { readManifest, writeManifest } from './_manifest.js';
 // Vercel's automatic body parsing for this route.
 export const config = { api: { bodyParser: false } };
 
+// Sentinel: the payload arrived already parsed into an object, so the exact
+// bytes Stripe signed are gone and signature verification cannot succeed.
+const RAW_BODY_UNAVAILABLE = 'RAW_BODY_UNAVAILABLE';
+
 async function readRawBody(req) {
   // Defensive: if some layer already buffered the body, reuse it as-is.
   if (Buffer.isBuffer(req.body)) return req.body;
   if (typeof req.body === 'string') return Buffer.from(req.body, 'utf8');
+  // If a body parser turned the payload into an object (bodyParser:false not
+  // honored by the platform), the raw bytes are unrecoverable — re-serializing
+  // would change whitespace/key order and never match the signature. Fail with
+  // a clear, specific error instead of a mysterious "bad signature".
+  if (req.body && typeof req.body === 'object') {
+    throw new Error(RAW_BODY_UNAVAILABLE);
+  }
   const chunks = [];
   for await (const chunk of req) {
     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
@@ -85,7 +96,16 @@ export default async function handler(req, res) {
     const signature = req.headers['stripe-signature'];
     event = stripe.webhooks.constructEvent(raw, signature, webhookSecret);
   } catch (err) {
-    res.status(400).json({ error: `Webhook signature verification failed: ${String((err && err.message) || err)}` });
+    const message = String((err && err.message) || err);
+    if (message === RAW_BODY_UNAVAILABLE) {
+      // Deployment-level problem, not a bad request from Stripe: the raw body
+      // was consumed before we could read it, so no signature can verify.
+      res.status(500).json({
+        error: 'Webhook cannot read the raw request body on this deployment, so Stripe signatures can never verify. Ensure this route runs with body parsing disabled (bodyParser:false).',
+      });
+      return;
+    }
+    res.status(400).json({ error: `Webhook signature verification failed: ${message}` });
     return;
   }
 
