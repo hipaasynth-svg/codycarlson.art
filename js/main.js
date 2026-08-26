@@ -1,33 +1,29 @@
 (() => {
   const cfg = window.SITE_CONFIG;
 
-  /* ---------------- Lazy image loading ---------------- */
-  // Gallery and store photos are set as CSS background images. Rather than
-  // downloading all of them (most are off-screen or in a horizontal carousel)
-  // on first load, defer each until it's about to scroll into view. This cuts
-  // the initial page weight to just the background plus whatever's on screen.
-  let _imgObserver = null;
-  function lazyBackground(el, url) {
-    if (!url) return;
-    if (!('IntersectionObserver' in window)) {
-      el.style.backgroundImage = `url("${url}")`;
-      return;
-    }
-    el.dataset.lazyBg = url;
-    if (!_imgObserver) {
-      _imgObserver = new IntersectionObserver((entries, obs) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          const target = entry.target;
-          if (target.dataset.lazyBg) {
-            target.style.backgroundImage = `url("${target.dataset.lazyBg}")`;
-            delete target.dataset.lazyBg;
-          }
-          obs.unobserve(target);
-        });
-      }, { rootMargin: '300px' });
-    }
-    _imgObserver.observe(el);
+  /* ---------------- Gallery / store photos ---------------- */
+  // Gallery and store photos render as real <img> elements rather than CSS
+  // background images: real images carry alt text (so they're reachable by
+  // screen readers and indexed by image search) and get native lazy-loading,
+  // which defers off-screen and carousel photos just like the old observer did.
+  function buildPhoto(url, alt) {
+    const img = document.createElement('img');
+    img.className = 'media-img';
+    // Set the loading mode before src so the browser defers off-screen photos.
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.draggable = false; // don't fight the carousel's drag-to-scroll
+    img.alt = alt || '';
+    img.src = url;
+    return img;
+  }
+
+  // Descriptive alt for a for-sale piece, e.g.
+  // "Great American Buffalo — acrylic on canvas, 16×24 in, by Cody Carlson".
+  function pieceAltText(piece) {
+    const title = (piece.title || '').trim() || 'Original artwork';
+    const detail = [piece.medium, piece.size].map((s) => (s || '').trim()).filter(Boolean).join(', ');
+    return detail ? `${title} — ${detail}, by Cody Carlson` : `${title}, by Cody Carlson`;
   }
 
   /* ---------------- Background ---------------- */
@@ -254,13 +250,14 @@
     const media = document.createElement('div');
     media.className = 'card-media piece-slide-media';
     if (img) {
-      lazyBackground(media, img);
+      media.appendChild(buildPhoto(img, pieceAltText(piece)));
       media.setAttribute('role', 'button');
       media.setAttribute('tabindex', '0');
       media.setAttribute('aria-label', `${piece.title || 'Piece'} — view larger`);
-      media.addEventListener('click', () => openLightbox(img));
+      const pieceAlt = pieceAltText(piece);
+      media.addEventListener('click', () => openLightbox(img, pieceAlt));
       media.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(img); }
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(img, pieceAlt); }
       });
     } else {
       media.classList.add('is-empty');
@@ -420,13 +417,14 @@
       card.className = 'rolodex-card';
       const media = document.createElement('div');
       media.className = 'card-media';
-      lazyBackground(media, url);
+      const alt = `${meta.label} ${i + 1} — ${meta.heading}, Cody Carlson`;
+      media.appendChild(buildPhoto(url, alt));
       media.setAttribute('role', 'button');
       media.setAttribute('tabindex', '0');
       media.setAttribute('aria-label', `${meta.label} ${i + 1} — view larger`);
-      media.addEventListener('click', () => openLightbox(url));
+      media.addEventListener('click', () => openLightbox(url, alt));
       media.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(url); }
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(url, alt); }
       });
       card.appendChild(media);
       track.appendChild(card);
@@ -508,9 +506,11 @@
   }
 
   /* ---------------- Lightbox ---------------- */
-  function openLightbox(src) {
+  function openLightbox(src, alt) {
     const lightbox = document.getElementById('lightbox');
-    document.getElementById('lightbox-img').src = src;
+    const lbImg = document.getElementById('lightbox-img');
+    lbImg.src = src;
+    lbImg.alt = alt || '';
     lightbox.hidden = false;
   }
   function closeLightbox() { document.getElementById('lightbox').hidden = true; }
