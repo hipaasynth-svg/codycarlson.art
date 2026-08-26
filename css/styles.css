@@ -579,6 +579,28 @@ img { max-width: 100%; display: block; }
   padding: 0 1.75rem;
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
 }
+/* Trust cue shown just above a store carousel — quieter than the intro, with a
+   subtle lock glyph to read as a security reassurance at the point of sale. */
+.store-trust {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.4rem;
+  text-align: center;
+  color: var(--cream-dim);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 0 1.75rem;
+  opacity: 0.85;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+.store-trust::before {
+  content: "\1F512"; /* 🔒 */
+  font-size: 0.8em;
+  opacity: 0.8;
+}
 /* A store card is a rolodex card that stacks a large photo over a caption
    (title / price / buy), instead of the pure-photo gallery card. */
 .piece-slide {

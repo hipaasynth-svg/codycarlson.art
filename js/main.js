@@ -220,7 +220,7 @@
   // (same depth/scroll behavior as the photo galleries) so a visitor sees all
   // the pieces at once and can click one for a larger view, with a Buy button.
   // A store with no pieces stays hidden — no placeholder cards ever show.
-  function initStoreCarousel({ sectionId, trackId, headingId, introId, items, heading, intro }) {
+  function initStoreCarousel({ sectionId, trackId, headingId, introId, items, heading, intro, trust }) {
     const section = document.getElementById(sectionId);
     const track = document.getElementById(trackId);
     if (!section || !track) return;
@@ -232,6 +232,16 @@
     const introEl = document.getElementById(introId);
     if (introEl) {
       if (intro) introEl.textContent = intro; else introEl.hidden = true;
+    }
+
+    // Trust cue at the point of purchase (secure checkout + how to ask
+    // questions). Rendered once per store, just above the carousel. Only shows
+    // for a store that actually has pieces, so an empty section stays clean.
+    if (trust) {
+      const note = document.createElement('p');
+      note.className = 'store-trust';
+      note.textContent = trust;
+      track.parentNode.insertBefore(note, track);
     }
 
     // With only a couple of pieces the arrows aren't needed.
@@ -255,6 +265,7 @@
       items,
       heading: cfg.availableHeading || 'Available Now',
       intro: cfg.availableIntro,
+      trust: cfg.storeTrustNote,
     });
   }
 
@@ -269,6 +280,7 @@
       items: Array.isArray(manifest.sculptures) ? manifest.sculptures : [],
       heading: cfg.sculptureHeading || 'Sculptures',
       intro: cfg.sculptureIntro,
+      trust: cfg.storeTrustNote,
     });
   }
 

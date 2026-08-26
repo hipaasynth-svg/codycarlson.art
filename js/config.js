@@ -123,6 +123,12 @@ window.SITE_CONFIG = {
   availableHeading: "Available Now",
   availableIntro: "Finished, one-of-a-kind pieces ready to ship. Buy directly below, or start a custom commission.",
 
+  // A short reassurance line shown under both store carousels (paintings and
+  // sculptures). Keep it factually true — it's a trust cue at the point of
+  // purchase. Default speaks to secure Stripe checkout and invites shipping
+  // questions rather than promising a specific policy. Leave blank to hide it.
+  storeTrustNote: "Secure card checkout, powered by Stripe. Questions about a piece — sizing, shipping, or an extra photo? Start an inquiry below and I'll get right back to you.",
+
   // ---- SCULPTURES (finished pieces for sale, with Stripe checkout) ---------
   // Same card + checkout behavior as the paintings store above, shown as its
   // own carousel at the TOP of the page. Managed from /admin → "Sculptures"
