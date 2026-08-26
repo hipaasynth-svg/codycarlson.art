@@ -69,7 +69,7 @@ window.SITE_CONFIG = {
     },
     {
       category: "Painting",
-      rate: "$0.80 per square inch",
+      rate: "60–80¢ per square inch",
       description: "Priced by finished canvas area (height × width in inches).",
     },
     {
