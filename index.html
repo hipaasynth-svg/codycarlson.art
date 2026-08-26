@@ -90,6 +90,19 @@
     </div>
   </header>
 
+  <!-- ============ SCULPTURES (populated from js/main.js) ============ -->
+  <section class="rolodex-section available-section" id="sculptures" hidden>
+    <div class="rolodex-header">
+      <h2 id="sculptures-heading"></h2>
+      <div class="rolodex-controls">
+        <button class="rolodex-arrow" data-dir="-1" aria-label="Scroll sculptures left">‹</button>
+        <button class="rolodex-arrow" data-dir="1" aria-label="Scroll sculptures right">›</button>
+      </div>
+    </div>
+    <p class="available-intro" id="sculptures-intro"></p>
+    <div class="rolodex-track" id="sculptures-track" tabindex="0" aria-label="Sculptures carousel"></div>
+  </section>
+
   <!-- ============ GALLERIES (populated from js/main.js) ============ -->
   <section class="rolodex-section rolodex-main" data-gallery="featured" hidden></section>
 
