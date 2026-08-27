@@ -85,6 +85,9 @@ export function renderPiece(piece) {
   };
 
   const buyMarkup = renderBuy(piece, buyable, status, priceText);
+  // Shipping reassurance at the point of sale: carvings are heavy, so shipping
+  // is quoted and billed separately to the buyer.
+  const shipMarkup = '<p class="pd-ship">Carvings are heavy, so shipping is billed separately and paid by the buyer — I’ll send a quote for your address.</p>';
 
   const metaLine = metaBits ? `<p class="pd-meta">${escapeHtml(metaBits)}</p>` : '';
   const priceLine = priceText
@@ -129,6 +132,10 @@ export function renderPiece(piece) {
   <link rel="stylesheet" href="/css/piece.css" />
 
   <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
+
+  <!-- Vercel Web Analytics (cookieless page views); active once enabled for
+       the project in the Vercel dashboard, harmless 404 until then. -->
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body class="piece-page">
   <div class="pd-bg" aria-hidden="true"></div>
@@ -149,6 +156,7 @@ export function renderPiece(piece) {
         ${metaLine}
         ${priceLine}
         ${buyMarkup}
+        ${shipMarkup}
         ${storyMarkup}
         <p class="pd-return"><a href="/#available">← Back to all available work</a></p>
       </div>

@@ -138,6 +138,14 @@ body.piece-page {
 }
 .pd-buy-btn[disabled] { opacity: 0.55; cursor: not-allowed; }
 
+.pd-ship {
+  color: var(--cream-dim);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin: -0.8rem 0 1.8rem;
+  max-width: 48ch;
+}
+
 .pd-story {
   border-top: 1px solid var(--card-border);
   padding-top: 1.4rem;
