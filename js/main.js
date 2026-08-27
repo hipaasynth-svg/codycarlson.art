@@ -741,6 +741,40 @@
     document.getElementById('footer-year').textContent = String(new Date().getFullYear());
   }
 
+  /* ---------------- Mailing list signup ---------------- */
+  // Lightweight email capture. Posts to /api/subscribe, which forwards the
+  // address to the studio inbox (subscriber emails are personal data, so they
+  // are never written to the site's public photo/price store).
+  function initSignup() {
+    const form = document.getElementById('signup-form');
+    if (!form) return;
+    const status = document.getElementById('signup-status');
+    const hp = document.getElementById('signup-hp');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = form.email.value.trim();
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        status.textContent = 'Please enter a valid email address.';
+        return;
+      }
+      // Honeypot filled → almost certainly a bot; show success without sending.
+      if (hp && hp.value) { status.textContent = 'Thanks — you’re on the list.'; form.reset(); return; }
+      status.textContent = 'Adding you…';
+      try {
+        const res = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        if (!res.ok) throw new Error('Request failed');
+        status.textContent = 'Thanks — you’re on the list.';
+        form.reset();
+      } catch (err) {
+        status.textContent = 'Something went wrong. Please try again, or email me directly.';
+      }
+    });
+  }
+
   /* ---------------- Init ---------------- */
   document.addEventListener('DOMContentLoaded', async () => {
     initBackground();
@@ -750,6 +784,7 @@
     initBio();
     initPricing();
     initOfferings();
+    initSignup();
     initFooter();
     initPurchaseBanner();
 

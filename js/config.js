@@ -100,7 +100,7 @@ window.SITE_CONFIG = {
       title: "Purchase a Demo",
       // PLACEHOLDER — replace with Cody's wording.
       description: "Watch a piece come to life from the first cut. Book a live carving demonstration — in person or streamed — and take home the finished work at the end.",
-      deposit: "$100", // PLACEHOLDER amount — set the real deposit.
+      deposit: "$200",
       depositNote: "Required to reserve your date. Applied toward your final total.",
       cta: "Book a Demo",
       inquiry: "I'd like to book a carving demo.",
@@ -110,7 +110,7 @@ window.SITE_CONFIG = {
       title: "On-site Carving",
       // PLACEHOLDER — replace with Cody's wording.
       description: "Have Cody carve on location — at your event, gallery, business, or gathering. Scope, scale, and subject are tailored to the occasion.",
-      deposit: "$250", // PLACEHOLDER amount — set the real deposit.
+      deposit: "$500",
       depositNote: "Required to book your date. Applied toward your final total.",
       cta: "Request On-site Carving",
       inquiry: "I'm interested in on-site carving.",
@@ -162,7 +162,7 @@ window.SITE_CONFIG = {
   // sculptures). Keep it factually true — it's a trust cue at the point of
   // purchase. Default speaks to secure Stripe checkout and invites shipping
   // questions rather than promising a specific policy. Leave blank to hide it.
-  storeTrustNote: "Secure card checkout, powered by Stripe. Questions about a piece — sizing, shipping, or an extra photo? Start an inquiry below and I'll get right back to you.",
+  storeTrustNote: "Secure card checkout, powered by Stripe. Carvings are heavy, so shipping is billed separately and paid by the buyer — I'll send a quote for your address. Questions about sizing, shipping, or an extra photo? Start an inquiry below and I'll get right back to you.",
 
   // ---- SCULPTURES (finished pieces for sale, with Stripe checkout) ---------
   // Same card + checkout behavior as the paintings store above, shown as its

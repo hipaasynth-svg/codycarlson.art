@@ -820,6 +820,45 @@ a.piece-slide-media { display: block; cursor: pointer; }
   font-size: 1rem;
 }
 
+/* ---------- Mailing list signup ---------- */
+.signup-card { text-align: center; }
+.signup-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.signup-form input[type="email"] {
+  flex: 1 1 240px;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  padding: 0.85rem 1.25rem;
+  color: var(--cream);
+  font-family: var(--sans);
+  font-size: 0.95rem;
+}
+.signup-form input[type="email"]::placeholder { color: var(--cream-dim); }
+.signup-form input[type="email"]:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-soft);
+}
+.signup-form .btn { flex: 0 0 auto; }
+/* Honeypot: kept in the DOM for bots, removed from view for people. */
+.signup-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.signup-status { margin-top: 1rem; }
+
 /* ---------- Footer ---------- */
 .site-footer {
   padding: 3rem 1.75rem 2.5rem;

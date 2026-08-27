@@ -83,6 +83,11 @@
     ]
   }
   </script>
+
+  <!-- Vercel Web Analytics (privacy-friendly, cookieless page views). Starts
+       collecting only once Web Analytics is enabled for this project in the
+       Vercel dashboard; the script 404s harmlessly until then. -->
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -235,6 +240,21 @@
     </div>
   </section>
   <section class="rolodex-section rolodex-secondary" data-gallery="silverRings" hidden></section>
+
+  <!-- ============ MAILING LIST ============ -->
+  <section class="content-section signup-section" id="signup">
+    <div class="content-card signup-card">
+      <h2 class="section-title">Stay in Touch</h2>
+      <p class="section-subtitle">Hear when new pieces come available, plus shows and studio news — an occasional note from the studio, nothing more. No spam; unsubscribe anytime.</p>
+      <form class="signup-form" id="signup-form" novalidate>
+        <input type="email" id="signup-email" name="email" placeholder="you@example.com" autocomplete="email" aria-label="Email address" required />
+        <!-- Honeypot: real people never see or fill this; bots do. -->
+        <input type="text" class="signup-hp" id="signup-hp" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <button type="submit" class="btn btn-primary">Keep me posted</button>
+      </form>
+      <p class="form-status signup-status" id="signup-status" role="status" aria-live="polite"></p>
+    </div>
+  </section>
 
   <!-- ============ FOOTER ============ -->
   <footer class="site-footer">
